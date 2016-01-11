@@ -1,5 +1,0 @@
-Log file created at: 2016/01/11 13:34:49
-Running on machine: QOSMIOD711
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-E0111 13:34:49.443379  2020 common.cpp:110] Cannot create Cublas handle. Cublas won't be available.
-E0111 13:34:49.444380  2020 common.cpp:117] Cannot create Curand generator. Curand won't be available.
