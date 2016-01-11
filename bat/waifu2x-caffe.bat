@@ -185,9 +185,9 @@ if "%mode01%" == "noise" goto nam_b
 if "%mode01%" == "scale" goto nam_c
 
 :nam_auto
-if "%~x1" == ".jpg" (
+if /I "%~x1" == ".jpg" (
  goto nam_a
- ) else if "%~x1" == ".jpeg" (
+ ) else if /I "%~x1" == ".jpeg" (
  goto nam_a
  ) else (
  goto nam_c
