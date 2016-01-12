@@ -284,11 +284,11 @@ if "%w2xcERROR%" GEQ "1" (
  ) else (
  echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam% >>%logname%.log 2>>&1
  echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam%
+  call wtb.bat STOP
  echo "%~1"変換時間 >>%logname%.log 2>>&1
  call wtb.bat PRINT >>%logname%.log 2>>&1
  echo "%~1"変換時間
  call wtb.bat PRINT
- call wtb.bat STOP
  shift
  goto EONam
  )
@@ -371,11 +371,12 @@ if "!w2xcERROR!" GEQ "1" (
  )
  echo !DATE! !TIME! "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam! >>%logname%.log 2>>&1
  echo !DATE! !TIME! "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam!
+ call wtb.bat STOP
  echo "%~1"変換時間 >>%logname%.log 2>>&1
  call wtb.bat PRINT >>%logname%.log 2>>&1
  echo "%~1"変換時間
  call wtb.bat PRINT
- call wtb.bat STOP
+
 
 exit /b
  
@@ -391,13 +392,13 @@ echo %DATE% %TIME% Finish waifu2x-caffe.bat >>%logname%.log 2>>&1
 echo これで読み込まれた全ての画像の変換が完了しました。 >>%logname%.log 2>>&1
 
 echo これで読み込まれた全ての画像の変換が完了しました。
-
+call wta.bat STOP
 echo waifu2x-converter.bat実行時間 >>%logname%.log 2>>&1
 call wta.bat PRINT >>%logname%.log 2>>&1
 
 echo waifu2x-converter.bat実行時間
 call wta.bat PRINT
-call wta.bat STOP
+
 echo. >>%logname%.log 2>&1
 echo. >>%logname%.log 2>&1
 echo ------------------------------------------- >>%logname%.log 2>>&1
