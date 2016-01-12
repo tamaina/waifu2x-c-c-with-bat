@@ -69,12 +69,13 @@ set out_ext01=png
 set subf01=true
 
 : true/false(有効/無効)
+: サブフォルダの中身はサブフォルダのなかに
 :=============================================================
 :
 :出力フォルダ名[bat独自]
 :
 
-set outfolder=waifuedk
+set outfolder=waifued
 
 
 :そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも
@@ -246,7 +247,7 @@ goto EONam
 
 :nam_b
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%.%out_ext01%
 goto EONam
 
 :nam_c
@@ -298,8 +299,8 @@ if "%w2xcERROR%" GEQ "1" (
 pushd %~dpn1
 set hoge=*.%inexli01::= *.%
 echo %hoge% 
-if "%subf01%" == true (
- for /R %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
+if "%subf01%" == "true" (
+ for /R %%t in (%hoge%) do call :w2xcaf1 "%%~t"
  ) else (
  for %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
  )
@@ -310,37 +311,38 @@ goto  Finish_w2xca
 
 :w2xcaf1
 popd
-echo %~1
-
+set cafname=%~n1
+if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>%logname%.log 2>>&1
+mkdir %~dp1\%outfolder%
 
 call wtb.bat START
 
 :ファイル名
 
-if "%mode01%" == "auto_scale" goto nam_auto
-if "%mode01%" == "noise_scale" goto nam_a
-if "%mode01%" == "noise" goto nam_b
-if "%mode01%" == "scale" goto nam_c
+if "%mode01%" == "auto_scale" goto nam_autof
+if "%mode01%" == "noise_scale" goto nam_af
+if "%mode01%" == "noise" goto nam_bf
+if "%mode01%" == "scale" goto nam_cf
 
-:nam_auto
+:nam_autof
 if /I "%~x1" == ".jpg" (
- goto nam_a
+ goto nam_af
  ) else if /I "%~x1" == ".jpeg" (
- goto nam_a
+ goto nam_af
  ) else (
- goto nam_c
+ goto nam_cf
  )
  
-:nam_a
+:nam_af
 set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
 goto EONamf
 
-:nam_b
+:nam_bf
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%.%out_ext01%
 goto EONamf
 
-:nam_c
+:nam_cf
 
 set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
 goto EONamf
@@ -393,10 +395,10 @@ echo これで読み込まれた全ての画像の変換が完了しました。 >>%logname%.log 2>>&1
 
 echo これで読み込まれた全ての画像の変換が完了しました。
 call wta.bat STOP
-echo waifu2x-converter.bat実行時間 >>%logname%.log 2>>&1
+echo waifu2x-caffe.bat実行時間 >>%logname%.log 2>>&1
 call wta.bat PRINT >>%logname%.log 2>>&1
 
-echo waifu2x-converter.bat実行時間
+echo waifu2x-caffe.bat実行時間
 call wta.bat PRINT
 
 echo. >>%logname%.log 2>&1
