@@ -4,7 +4,7 @@
 :設定
 :#############################################################
 : 設定方法
-:set xx01=[モード]←書き換えてください
+:set xx01=[モード]←深いことは考えず=の後ろを書き換えてください
 :=============================================================
 :
 :動作モード[-m --mode]
@@ -70,19 +70,26 @@ set subf01=true
 
 : true/false(有効/無効)
 :=============================================================
+:
+:出力フォルダ名[bat独自]
+:
+
+set outfolder=waifuedk
+
+
+:そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも
+:しれないので変更できるようにしてみたり
 :=============================================================
-:=============================================================
-:=============================================================
-:=============================================================
-:=============================================================
+:分割の計算にも対応したいなぁとか思ったり
 :#############################################################
 :諸注意
 :#############################################################
 :・出力画像名は
-: waifu2xc-[処理モード]-Lv[ノイズLv]-[拡大率]x_[元画像名].jpg
+: [元画像名]_waifu2xca-[処理モード]-Lv[ノイズLv]-[拡大率]x.jpg
 :  となります。
+:
 :（例）
-:　　waifu2x-noise_scale-Lv1-4x_asoboy.jpg
+:　　waifu2xca-noise_scale-Lv1-4x_asoboy.jpg
 :
 :
 :この下から処理用のプログラムが始まります。
@@ -151,12 +158,12 @@ set datcdd=%~d0
 set datcdp=%~p0
 set datcdn=%~n0
 set process01=gpu
-mkdir %~dp1\waifued
-set logname=%~dp1\waifued\result
+mkdir %~dp1\%outfolder%
+set logname=%~dp1\%outfolder%\result
 echo %DATE% %TIME% ファイルモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [ファイルモード] >>%logname%.log 2>>&1
-echo %DATE% %TIME% "%~dp1\waifued"を作成
-echo %DATE% %TIME% %logname%.logを作成(すでにある場合は追記します。)
+echo %DATE% %TIME% "%~dp1\%outfolder%"を作成
+echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
 cd /d %~dp0 >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
 goto next1
@@ -166,18 +173,18 @@ set datcdd=%~d0
 set datcdp=%~p0
 set datcdn=%~n0
 set process01=gpu
-mkdir %~dpn1\waifued
-set logname=%~dpn1\waifued\result
+mkdir %~dpn1\%outfolder%
+set logname=%~dpn1\%outfolder%\result
 echo %DATE% %TIME% フォルダモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [フォルダモード] >>%logname%.log 2>>&1
-echo %DATE% %TIME% "%~dpn1\waifued"を作成
-echo %DATE% %TIME% %logname%.logを作成(すでにある場合は追記します。)
+echo %DATE% %TIME% "%~dpn1\%outfolder%"を作成
+echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
 cd /d %~dp0 >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
 
 
 :next1
-call wta.bat BEGIN
+call wta.bat START
 
 :CPU検出
 
@@ -216,7 +223,7 @@ if "%folder%" == "true" (
 :===========================================================================================================================================
 
 :w2xca_file
-call wtb.bat BEGIN
+call wtb.bat START
 :ファイル名
 
 if "%mode01%" == "auto_scale" goto nam_auto
@@ -257,7 +264,7 @@ echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\waifued\%mode01nam%" >>%logname%.log 2>>&1
+waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" >>%logname%.log 2>>&1
 
 set w2xcERROR=%ERRORLEVEL%
 
@@ -304,9 +311,9 @@ goto  Finish_w2xca
 :w2xcaf1
 popd
 echo %~1
-pause
 
-call wtb.bat BEGIN
+
+call wtb.bat START
 
 :ファイル名
 
@@ -344,7 +351,7 @@ echo. >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
 
-waifu2x-caffe-cui -p !process01! --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%%~dp1\waifued\!mode01nam!" >>%logname%.log 2>>&1
+waifu2x-caffe-cui -p !process01! --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" >>%logname%.log 2>>&1
 
 set w2xcERROR=!ERRORLEVEL!
 
@@ -362,9 +369,9 @@ if "!w2xcERROR!" GEQ "1" (
   exit
   )
  )
- echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam! >>%logname%.log 2>>&1
- echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam!
- echo "%%~1"変換時間 >>%logname%.log 2>>&1
+ echo !DATE! !TIME! "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam! >>%logname%.log 2>>&1
+ echo !DATE! !TIME! "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam!
+ echo "%~1"変換時間 >>%logname%.log 2>>&1
  call wtb.bat PRINT >>%logname%.log 2>>&1
  echo "%~1"変換時間
  call wtb.bat PRINT
