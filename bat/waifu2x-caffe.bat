@@ -63,11 +63,12 @@ set out_ext01=png
 : 指定できるのは一つです(このbatの仕様です)
 :=============================================================
 :
-
-
-
+:サブフォルダも処理する[bat独自]
 :
-:
+
+set subf01=true
+
+: true/false(有効/無効)
 :=============================================================
 :=============================================================
 :=============================================================
@@ -133,17 +134,49 @@ set out_ext01=png
 
 
 :準備
+setlocal enabledelayedexpansion
+pushd %~1
+if Errorlevel 1 (
+ set folder=false
+ goto s_file
+) else (
+ popd
+ set folder=true
+ goto s_folder
+)
+
+
+:s_file
 set datcdd=%~d0
 set datcdp=%~p0
 set datcdn=%~n0
 set process01=gpu
-mkdir "%~dp1\waifued"
-echo %DATE% %TIME% "%~dp1\waifued"を作成
+mkdir %~dp1\waifued
 set logname=%~dp1\waifued\result
-echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) >>%logname%.log 2>>&1
+echo %DATE% %TIME% ファイルモード
+echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [ファイルモード] >>%logname%.log 2>>&1
+echo %DATE% %TIME% "%~dp1\waifued"を作成
 echo %DATE% %TIME% %logname%.logを作成(すでにある場合は追記します。)
 cd /d %~dp0 >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
+goto next1
+
+:s_folder
+set datcdd=%~d0
+set datcdp=%~p0
+set datcdn=%~n0
+set process01=gpu
+mkdir %~dpn1\waifued
+set logname=%~dpn1\waifued\result
+echo %DATE% %TIME% フォルダモード
+echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [フォルダモード] >>%logname%.log 2>>&1
+echo %DATE% %TIME% "%~dpn1\waifued"を作成
+echo %DATE% %TIME% %logname%.logを作成(すでにある場合は追記します。)
+cd /d %~dp0 >>%logname%.log 2>>&1
+cd .. >>%logname%.log 2>>&1
+
+
+:next1
 call wta.bat BEGIN
 
 :CPU検出
@@ -161,21 +194,119 @@ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
  )
 
 
-:loop
-if "%~1" == "" goto end
+:渡す変数(モード関係)
+
+set mode01var=-m %mode01% --noise_level %noise_level01% --scale_ratio %scale_ratio01% -l %inexli01% -e %out_ext01%
+echo %DATE% %TIME% 初期準備が完了しました。 >>%logname%.log 2>>&1
 echo %DATE% %TIME% 初期準備が完了しました。
 echo ------------------------------------------- >>%logname%.log 2>>&1
 echo -------------------------------------------
+
+
+if "%folder%" == "true" (
+ echo %DATE% %TIME% フォルダモード >>%logname%.log 2>>&1
+ echo %DATE% %TIME% フォルダモード
+ goto w2xca_folder
+ ) else (
+ echo %DATE% %TIME% ファイルモード >>%logname%.log 2>>&1
+ echo %DATE% %TIME% ファイルモード
+ goto w2xca_file
+ )
+
+:===========================================================================================================================================
+
+:w2xca_file
 call wtb.bat BEGIN
+:ファイル名
+
+if "%mode01%" == "auto_scale" goto nam_auto
+if "%mode01%" == "noise_scale" goto nam_a
+if "%mode01%" == "noise" goto nam_b
+if "%mode01%" == "scale" goto nam_c
+
+:nam_auto
+if /I "%~x1" == ".jpg" (
+ goto nam_a
+ ) else if /I "%~x1" == ".jpeg" (
+ goto nam_a
+ ) else (
+ goto nam_c
+ )
+ 
+:nam_a
+set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+goto EONam
+
+:nam_b
+
+set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+goto EONam
+
+:nam_c
+
+set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+goto EONam
+
+:EONam
+
+if "%~1" == "" goto Finish_w2xca
+
 
 echo.
 echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-:渡す変数(モード関係)
+waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\waifued\%mode01nam%" >>%logname%.log 2>>&1
 
-set mode01var=-p %process01% -m %mode01% --noise_level %noise_level01% --scale_ratio %scale_ratio01% -l %inexli01% -e %out_ext01%
+set w2xcERROR=%ERRORLEVEL%
+
+if "%w2xcERROR%" GEQ "1" (
+ if "%process01%" == "gpu" (
+  set process01=cpu
+  echo %DATE% %TIME% Nvidia GPUでの変換を試みましたが、できませんでした。CPUでの変換を開始します。 >>%logname%.log 2>>&1
+  echo %DATE% %TIME% Nvidia GPUでの変換を試みましたが、できませんでした。CPUでの変換を開始します。
+  goto EONam
+  ) else (
+  echo %DATE% %TIME% CPUで処理しましたが、エラーが発生して変換できませんでした。 >>%logname%.log 2>>&1
+  echo %DATE% %TIME% CPUで処理しましたが、エラーが発生して変換できませんでした。
+  echo 終了するには何かキーを押してください。
+  pause > NUL
+  exit
+  )
+ ) else (
+ echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam% >>%logname%.log 2>>&1
+ echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam%
+ echo "%~1"変換時間 >>%logname%.log 2>>&1
+ call wtb.bat PRINT >>%logname%.log 2>>&1
+ echo "%~1"変換時間
+ call wtb.bat PRINT
+ call wtb.bat STOP
+ shift
+ goto EONam
+ )
+
+:===========================================================================================================================================
+:w2xca_folder
+pushd %~dpn1
+set hoge=*.%inexli01::= *.%
+echo %hoge% 
+if "%subf01%" == true (
+ for /R %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
+ ) else (
+ for %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
+ )
+
+goto  Finish_w2xca
+
+
+
+:w2xcaf1
+popd
+echo %~1
+pause
+
+call wtb.bat BEGIN
 
 :ファイル名
 
@@ -191,52 +322,62 @@ if /I "%~x1" == ".jpg" (
  goto nam_a
  ) else (
  goto nam_c
- ) 
+ )
  
 :nam_a
-set mode01nam=waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
-goto EONam
+set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+goto EONamf
 
 :nam_b
 
-set mode01nam=waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
-goto EONam
+set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+goto EONamf
 
 :nam_c
 
-set mode01nam=waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
-goto EONam
+set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+goto EONamf
 
-:EONam
-:Beg_w2xc
-
-waifu2x-caffe-cui --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\waifued\%mode01nam%" >>%logname%.log 2>>&1
-
-set w2xcERROR=%ERRORLEVEL%
-
-if "%w2xcERROR%" GEQ "1" (
- set process01=cpu
- echo %DATE% %TIME% gpuでの変換を試みましたが、できませんでした。cpuでの変換を開始します。 >>%logname%.log 2>>&1
- echo %DATE% %TIME% gpuでの変換を試みましたが、できませんでした。cpuでの変換を開始します。
- goto Beg_w2xc
- )
-
+:EONamf
 echo.
 echo. >>%logname%.log 2>>&1
-echo %DATE% %TIME% "%~1"の変換作業が終了しました。 >>%logname%.log 2>>&1
-echo %DATE% %TIME% "%~1"の変換作業が終了しました。
-echo. >>%logname%.log 2>&1
-echo.
-echo "%~1"変換時間 >>%logname%.log 2>>&1
-call wta.bat PRINT >>%logname%.log 2>>&1
-echo "%~1"変換時間
-call wtb.bat PRINT
-call wtb.bat STOP
+echo !DATE! !TIME! "%~1"の変換を開始します... >>%logname%.log 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します...
 
-shift
-goto loop
+waifu2x-caffe-cui -p !process01! --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%%~dpt\waifued\!mode01nam!" >>%logname%.log 2>>&1
 
-:end
+set w2xcERROR=!ERRORLEVEL!
+
+if "!w2xcERROR!" GEQ "1" (
+ if "!process01!" == "gpu" (
+  set process01=cpu
+  echo !DATE! !TIME! Nvidia GPUでの変換を試みましたが、できませんでした。CPUでの変換を開始します。 >>%logname%.log 2>>&1
+  echo !DATE! !TIME! Nvidia GPUでの変換を試みましたが、できませんでした。CPUでの変換を開始します。
+  goto EONamf
+  ) else (
+  echo !DATE! !TIME! CPUで処理しましたが、エラーが発生して変換できませんでした。 >>%logname%.log 2>>&1
+  echo !DATE! !TIME! CPUで処理しましたが、エラーが発生して変換できませんでした。
+  echo 終了するには何かキーを押してください。
+  pause > NUL
+  exit
+  )
+ )
+ echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam! >>%logname%.log 2>>&1
+ echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:!mode01nam!
+ echo "%%~1"変換時間 >>%logname%.log 2>>&1
+ call wtb.bat PRINT >>%logname%.log 2>>&1
+ echo "%~1"変換時間
+ call wtb.bat PRINT
+ call wtb.bat STOP
+
+exit /b
+ 
+:===========================================================================================================================================
+
+:Finish_w2xca
+
+
+
 echo ------------------------------------------- >>%logname%.log 2>>&1
 echo -------------------------------------------
 echo %DATE% %TIME% Finish waifu2x-caffe.bat >>%logname%.log 2>>&1
@@ -255,5 +396,6 @@ echo. >>%logname%.log 2>&1
 echo ------------------------------------------- >>%logname%.log 2>>&1
 echo. >>%logname%.log 2>&1
 echo. >>%logname%.log 2>&1
-:EOF
+
 pause
+:end
