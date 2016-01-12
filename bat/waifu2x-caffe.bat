@@ -304,6 +304,10 @@ if "%subf01%" == "true" (
  ) else (
  for %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
  )
+if not "%~1" == "" (
+ shift
+ goto w2xca_folder
+ )
 
 goto  Finish_w2xca
 
