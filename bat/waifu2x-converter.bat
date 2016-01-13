@@ -62,6 +62,15 @@ set outfolder=waifued
 :そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも
 :しれないので変更できるようにしてみたり
 :=============================================================
+:
+:その他オプション(上級者用設定)
+:
+
+set otheropco01=
+
+:なにかご自分で指定したいオプションがあれば指定してください。
+:コマンドプロンプトで打ち込む形で記入してください。
+:=============================================================
 :分割の計算にも対応したいなぁとか思ったり
 :#############################################################
 :諸注意
@@ -262,7 +271,7 @@ echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-%usewaifu% --model_dir ".\models\%model01%" %mode01var% -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\%mode01nam%" >>%logname%.log 2>>&1
+%usewaifu% --model_dir ".\models\%model01%" %mode01var% -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\%mode01nam%" %otheropco01% >>%logname%.log 2>>&1
 
 
 set w2xcERROR=%ERRORLEVEL%
@@ -355,7 +364,7 @@ echo. >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
 
-%usewaifu% --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\!mode01nam!" >>%logname%.log 2>>&1
+%usewaifu% --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\!mode01nam!" %otheropco01% >>%logname%.log 2>>&1
 
 
 set w2xcERROR=!ERRORLEVEL!

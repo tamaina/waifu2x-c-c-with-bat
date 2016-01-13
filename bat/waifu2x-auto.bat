@@ -303,7 +303,7 @@ echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-%usewaifu% --model_dir ".\models\%model01%" %mode01var% -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\%mode01nam%" >>%logname%.log 2>>&1
+%usewaifu% --model_dir ".\models\%model01%" %mode01var% -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\%mode01nam%" %otheropco01% >>%logname%.log 2>>&1
 
 
 set w2xcERROR=%ERRORLEVEL%
@@ -371,7 +371,7 @@ echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" >>%logname%.log 2>>&1
+waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" %otheropca01% >>%logname%.log 2>>&1
 
 set w2xcERROR=%ERRORLEVEL%
 
@@ -471,7 +471,7 @@ echo. >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
 
-%usewaifu% --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\!mode01nam!" >>%logname%.log 2>>&1
+%usewaifu% --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\waifued\!mode01nam!" %otheropco01% >>%logname%.log 2>>&1
 
 
 set w2xcERROR=!ERRORLEVEL!
@@ -562,7 +562,7 @@ echo. >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
 
-waifu2x-caffe-cui -p !process01! --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" >>%logname%.log 2>>&1
+waifu2x-caffe-cui -p !process01! --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" %otheropca01% >>%logname%.log 2>>&1
 
 set w2xcERROR=!ERRORLEVEL!
 
