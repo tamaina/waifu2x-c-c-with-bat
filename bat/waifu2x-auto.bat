@@ -84,6 +84,16 @@ set out_ext01=png
 : デフォルトはpng
 : 指定できるのは一つです(このbatの仕様です)
 :=============================================================
+:
+:その他オプション(上級者用設定)
+:
+:          ↓ca(上)がcaffe co(下)がconverter-cpp
+set otheropca01=
+set otheropco01=
+
+:なにかご自分で指定したいオプションがあれば指定してください。
+:コマンドプロンプトで打ち込む形で記入してください。
+:=============================================================
 :分割の計算にも対応したいなぁとか思ったり
 :#############################################################
 :諸注意
@@ -145,11 +155,23 @@ set out_ext01=png
 
 
 :準備
-setlocal enabledelayedexpansion
 set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
+setlocal enabledelayedexpansion
+set firstprocess=true
 set process01=gpu
+set datcdd=%~d0
+set datcdp=%~p0
+set datcdn=%~n0
+goto ffjudge
+
+:restart
+if "%~1" == "" goto Finish_w2xco
+set firstprocess=false
+
+:ffjudge
 pushd %~1
-if Errorlevel 1 (
+set pushderrorlv=%ErrorLevel%
+if "%pushderrorlv%" GEQ "1" (
  set folder=false
  goto s_file
 ) else (
@@ -158,45 +180,56 @@ if Errorlevel 1 (
  goto s_folder
 )
 
-
 :s_file
-set datcdd=%~d0
-set datcdp=%~p0
-set datcdn=%~n0
 
 mkdir %~dp1\%outfolder%
-set logname=%~dp1\%outfolder%\result
+set logname=%~dp1\%outfolder%\w2xresult
 echo %DATE% %TIME% ファイルモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [ファイルモード] >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~dp1\%outfolder%"を作成
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d %~dp0 >>%logname%.log 2>>&1
+cd /d %datcdd%%datcdp% >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
-goto next1
+if "%firstprocess%" == "true" (
+ goto next1
+ ) else (
+ if "usewaifu" == "waifu2x-converter_x64" (
+ goto w2xco_file
+ ) else if "usewaifu" == "waifu2x-converter" (
+ goto w2xco_file
+ ) else (
+ goto w2xca_file
+ )
+ )
 
 :s_folder
-set datcdd=%~d0
-set datcdp=%~p0
-set datcdn=%~n0
-set foldernamevar=%~1
+
 mkdir %~dpn1\%outfolder%
-set logname=%~dpn1\%outfolder%\result
+set logname=%~dpn1\%outfolder%\w2xresult
 echo %DATE% %TIME% フォルダモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [フォルダモード] >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~dpn1\%outfolder%"を作成
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d %~dp0 >>%logname%.log 2>>&1
+cd /d %datcdd%%datcdp% >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
-
+if "%firstprocess%" == "true" (
+ goto next1
+ ) else (
+ if "usewaifu" == "waifu2x-converter_x64" (
+ goto w2xco_folder
+ ) else if "usewaifu" == "waifu2x-converter" (
+ goto w2xco_folder
+ ) else (
+ goto w2xca_folder
+ )
+ )
 
 :next1
 call wta.bat START
 
-
-
 :CPU検出
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
- set usewaifu=waifu2x-converter_x64
+ set usewaifu=waifu2x-caffe
  echo %DATE% %TIME% 64bitCPUを検出しました。はじめにwaifu2x-caffeで処理します。
  echo %DATE% %TIME% 64bitCPUを検出しました。はじめにwaifu2x-caffeで処理します。 >>%logname%.log 2>>&1
  if "%folder%" == "true" (
@@ -282,13 +315,19 @@ if "%w2xcERROR%" GEQ "1" (
  echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam% >>%logname%.log 2>>&1
  echo %DATE% %TIME% "%~1"の変換作業が正常に終了しました。生成画像名:%mode01nam%
  )
-  call wtb.bat STOP
+ call wtb.bat STOP
  echo "%~1"変換時間 >>%logname%.log 2>>&1
  call wtb.bat PRINT >>%logname%.log 2>>&1
  echo "%~1"変換時間
  call wtb.bat PRINT
  shift
- goto EONamo
+ pushd %~1
+ if Errorlevel 1 (
+ goto w2xco_file
+ ) else (
+ popd
+ goto restart
+ )
 :===========================================================================================================================================
 :w2xca_file
 call wtb.bat START
@@ -338,6 +377,7 @@ set w2xcERROR=%ERRORLEVEL%
 
 if "%w2xcERROR%" GEQ "1" (
  if "%process01%" == "gpu" (
+  set usewaifu=waifu2x-converter_x64
   echo %DATE% %TIME% Nvidia GPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>%logname%.log 2>>&1
   echo %DATE% %TIME% Nvidia GPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
   goto w2xco_file
@@ -354,7 +394,13 @@ if "%w2xcERROR%" GEQ "1" (
  echo "%~1"変換時間
  call wtb.bat PRINT
  shift
- goto EONama
+ pushd %~1
+ if Errorlevel 1 (
+ goto w2xca_file
+ ) else (
+ popd
+ goto restart
+ )
  )
 
 :===========================================================================================================================================
@@ -371,7 +417,7 @@ if "%subf01%" == "true" (
  )
 if not "%~1" == "" (
  shift
- goto w2xco_folder
+ goto restart
  )
 goto  Finish_w2x
 
@@ -458,6 +504,7 @@ if "%subf01%" == "true" (
  for %%t in (%hoge%) do call :w2xcaf1 "%~dpn1\%%~t"
  )
 if "%w2xcERROR%" GEQ "1" (
+ set usewaifu=waifu2x-converter_x64
  echo !DATE! !TIME! Nvidia GPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>%logname%.log 2>>&1
  echo !DATE! !TIME! Nvidia GPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
  goto w2xco_folder
@@ -465,7 +512,7 @@ if "%w2xcERROR%" GEQ "1" (
 shift
 if not "%~1" == "" (
  shift
- goto w2xca_folder
+ goto restart
  )
 goto  Finish_w2x
 
