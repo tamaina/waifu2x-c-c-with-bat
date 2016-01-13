@@ -75,7 +75,7 @@ set subf01=true
 :出力フォルダ名[bat独自]
 :
 
-set outfolder=waifued
+set outfolder=waifucaed
 
 
 :そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも
@@ -143,8 +143,21 @@ set outfolder=waifued
 
 :準備
 setlocal enabledelayedexpansion
+set firstprocess=true
+set process01=gpu
+set datcdd=%~d0
+set datcdp=%~p0
+set datcdn=%~n0
+goto ffjudge
+
+:restart
+if "%~1" == "" goto Finish_w2xco
+set firstprocess=false
+
+:ffjudge
 pushd %~1
-if Errorlevel 1 (
+set pushderrorlv=%ErrorLevel%
+if "%pushderrorlv%" GEQ "1" (
  set folder=false
  goto s_file
 ) else (
@@ -154,34 +167,38 @@ if Errorlevel 1 (
 )
 
 
+
 :s_file
-set datcdd=%~d0
-set datcdp=%~p0
-set datcdn=%~n0
-set process01=gpu
+
 mkdir %~dp1\%outfolder%
-set logname=%~dp1\%outfolder%\result
+set logname=%~dp1\%outfolder%\w2xresult
 echo %DATE% %TIME% ファイルモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [ファイルモード] >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~dp1\%outfolder%"を作成
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d %~dp0 >>%logname%.log 2>>&1
+cd /d %datcdd%%datcdp% >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
-goto next1
+if "%firstprocess%" == "true" (
+ goto next1
+ ) else (
+ goto w2xca_file
+ )
 
 :s_folder
-set datcdd=%~d0
-set datcdp=%~p0
-set datcdn=%~n0
-set process01=gpu
+
 mkdir %~dpn1\%outfolder%
-set logname=%~dpn1\%outfolder%\result
+set logname=%~dpn1\%outfolder%\w2xresult
 echo %DATE% %TIME% フォルダモード
 echo %DATE% %TIME% Run %datcdn%.bat(%datcdd%%datcdp%) [フォルダモード] >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~dpn1\%outfolder%"を作成
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d %~dp0 >>%logname%.log 2>>&1
+cd /d %datcdd%%datcdp% >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
+if "%firstprocess%" == "true" (
+ goto next1
+ ) else (
+ goto w2xca_folder
+ )
 
 
 :next1
@@ -291,7 +308,13 @@ if "%w2xcERROR%" GEQ "1" (
  echo "%~1"変換時間
  call wtb.bat PRINT
  shift
- goto EONam
+ pushd %~1
+ if Errorlevel 1 (
+ goto w2xca_file
+ ) else (
+ popd
+ goto restart
+ )
  )
 
 :===========================================================================================================================================
@@ -306,7 +329,7 @@ if "%subf01%" == "true" (
  )
 if not "%~1" == "" (
  shift
- goto w2xca_folder
+ goto restart
  )
 
 goto  Finish_w2xca
