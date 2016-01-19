@@ -21,7 +21,7 @@ set mode01=auto_scale
 :モデル選択[--model_dir]
 :
 
-set model01=anime_style_art_rgb
+set model01=photo
 
 : anime_style_art(二次画像 輝度のみ)
 : anime_style_art_rgb(二次画像 RGBで)
@@ -31,7 +31,7 @@ set model01=anime_style_art_rgb
 :拡大率[--scale_ratio]
 :
 
-set scale_ratio01=2
+set scale_ratio01=4
 
 : 数字(単位 倍)小数点可
 :=============================================================
