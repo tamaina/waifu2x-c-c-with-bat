@@ -28,7 +28,14 @@ set waitingtime=60
 
 : 秒
 :=============================================================
+:
+:出力フォルダ名初期値
+:
 
+set outfolder=waifued
+
+: 初期値です
+:=============================================================
 
 
 
@@ -36,11 +43,11 @@ set waitingtime=60
 :choice00
 choice /C YN /T %waitingtime% /D Y /M "[usew2x]caffe/converter-cppどちらを使用するか自動で決定しますか"
 if "%errorlevel%" == "1" (
- echo -指定しない
- set ccchoice=
+ echo -指定する
  goto choice01
  ) else (
- echo -指定する
+ echo -指定しない
+ set ccchoice=
  )
 choice /N /C AP /T %waitingtime% /D A /M "[usew2x]では、caffe/converter-cppどちらを使用しますか[A:caffe,P:cpp]?"
 if errorlevel 2 (
@@ -132,6 +139,15 @@ if errorlevel 2 (
  echo -する
 set /P inexli01=入力画像の拡張子を入力("."は要りません/":"で区切ります/"端"は区切り記号を【入れません】)
 
+:choice06a
+choice /C YN /T %waitingtime% /D N /M "[共通]出力フォルダ名を変更しますか？ 初期値:%outfolder%(batを直接開いて変更可)"
+
+if errorlevel 2 (
+ echo -しない
+ gotto choice07
+ )
+ echo -する
+set /P outfolder=出力フォルダ名変更(何も書かないと同じフォルダに出力します)
 :choice07
 echo 以上で設定は終わりです。
 choice /C YN /T %waitingtime% /D Y /M "処理を開始しますか？Nを押すと最初から設定します。"
@@ -179,16 +195,7 @@ echo %DATE% %TIME% "%~dp1\%outfolder%"を作成
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
 cd /d %datcdd%%datcdp% >>%logname%.log 2>>&1
 cd .. >>%logname%.log 2>>&1
-if "%usewaifu%" == "" (
- goto next1
- ) else if "%usewaifu%" == "waifu2x-converter_x64" (
- goto w2xco_file
- ) else if "%usewaifu%" == "waifu2x-converter" (
- goto w2xco_file
- ) else (
- goto w2xca_file
- )
-
+goto next1
 
 :s_folder
 
@@ -268,6 +275,15 @@ echo %DATE% %TIME% 32bitCPUを検出しました。 >>%logname%.log 2>>&1
  echo 32bit版waifu2x-converterで処理します。 >>%logname%.log 2>>&1
  echo 32bit版waifu2x-converterで処理します。 >>%logname%.log 2>>&1
  )
+  if "%folder%" == "true" (
+  echo %DATE% %TIME% フォルダモード >>%logname%.log 2>>&1
+  echo %DATE% %TIME% フォルダモード
+  goto w2xco_folder
+  ) else (
+  echo %DATE% %TIME% ファイルモード >>%logname%.log 2>>&1
+  echo %DATE% %TIME% ファイルモード
+  goto w2xco_file
+  )
  )
  
 
@@ -303,19 +319,19 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_ao
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-%mode01%-Lv%noise_level01%-%scale_ratio01%x%~x1
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamo
 
 :nam_bo
 
-set mode01nam=%~n1_waifu2x-noise-Lv%noise_level01%%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-noise-Lv%noise_level01%%~x1
 set mode01var=-m noise --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamo
 
 :nam_co
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-%mode01%-%scale_ratio01%x%~x1
 set mode01var=-m scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamo
 
@@ -374,17 +390,17 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_aa
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
 goto EONama
 
 :nam_ba
 
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%.%out_ext01%
 goto EONama
 
 :nam_ca
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-%scale_ratio01%x.%out_ext01%
 goto EONama
 
 :EONama
@@ -475,19 +491,19 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_af
-set mode01nam=%~n1_waifu2x-noise_scale-Lv%noise_level01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-noise_scale-Lv%noise_level01%-%scale_ratio01%x%~x1
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
 :nam_bf
 
-set mode01nam=%~n1_waifu2x-noise-Lv%noise_level01%%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-noise-Lv%noise_level01%%~x1
 set mode01var=-m noise --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
 :nam_cf
 
-set mode01nam=%~n1_waifu2x-scale-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-converter-cpp-scale-%scale_ratio01%x%~x1
 set mode01var=-m scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
@@ -569,17 +585,17 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_afa
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
 goto EONamfa
 
 :nam_bfa
 
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%.%out_ext01%
 goto EONamfa
 
 :nam_cfa
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01nam=%~n1_waifu2x-caffe-%mode01%-%scale_ratio01%x.%out_ext01%
 goto EONamfa
 
 :EONamfa

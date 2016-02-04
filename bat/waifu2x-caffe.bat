@@ -75,7 +75,7 @@ set subf01=true
 :出力フォルダ名[bat独自]
 :
 
-set outfolder=waifucaed
+set outfolder=waifuca
 
 
 :そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも

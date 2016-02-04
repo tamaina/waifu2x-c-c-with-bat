@@ -245,6 +245,16 @@ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
  set usewaifu=waifu2x-converter
  echo %DATE% %TIME% 32bitCPUを検出しました。32bit版waifu2x-converterで処理します。
  echo %DATE% %TIME% 32bitCPUを検出しました。32bit版waifu2x-converterで処理します。 >>%logname%.log 2>>&1
+  if "%folder%" == "true" (
+  echo %DATE% %TIME% フォルダモード >>%logname%.log 2>>&1
+  echo %DATE% %TIME% フォルダモード
+  goto w2xco_folder
+  ) else (
+  echo %DATE% %TIME% ファイルモード >>%logname%.log 2>>&1
+  echo %DATE% %TIME% ファイルモード
+  goto w2xco_file
+  )
+
  )
 
 

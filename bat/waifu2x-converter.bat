@@ -31,7 +31,7 @@ set model01=photo
 :拡大率[--scale_ratio]
 :
 
-set scale_ratio01=4
+set scale_ratio01=5
 
 : 数字(単位 倍)小数点可
 :=============================================================
@@ -39,7 +39,7 @@ set scale_ratio01=4
 :ノイズ除去レベル[--noise_level]
 :
 
-set noise_level01=1
+set noise_level01=2
 
 : 1,2 どちらかを選択
 : 1のほうが除去量が少なく現物に忠実
@@ -76,11 +76,11 @@ set otheropco01=
 :諸注意
 :#############################################################
 :・出力画像名は
-: [元画像名]_waifu2xco-[処理モード]-Lv[ノイズLv]-[拡大率]x.jpg
+: [元画像名]_waifu2xco-[処理モード]-[モデル]-Lv[ノイズLv]-[拡大率]x.jpg
 :  となります。
 :
 :（例）
-:　　waifu2xco-noise_scale-Lv1-4x_asoboy.jpg
+:　　waifu2xco-noise_scale-photo-Lv1-4x_asoboy.jpg
 :
 :
 :この下から処理用のプログラムが始まります。
@@ -186,7 +186,7 @@ cd .. >>%logname%.log 2>>&1
 if "%firstprocess%" == "true" (
  goto next1
  ) else (
- goto w2xco_folder
+ goto shiwake
  )
 
 :next1
@@ -204,16 +204,12 @@ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
  )
 
 
-
-:渡す変数(モード関係)
-
-:set mode01var=-m %mode01% --noise_level %noise_level01% --scale_ratio %scale_ratio01% -l
 echo %DATE% %TIME% 初期準備が完了しました。 >>%logname%.log 2>>&1
 echo %DATE% %TIME% 初期準備が完了しました。
 echo ------------------------------------------- >>%logname%.log 2>>&1
 echo -------------------------------------------
 
-
+:shiwake
 if "%folder%" == "true" (
  echo %DATE% %TIME% フォルダモード >>%logname%.log 2>>&1
  echo %DATE% %TIME% フォルダモード
@@ -245,19 +241,19 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_a
-set mode01nam=%~n1_waifu2x-%mode01%-Lv%noise_level01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scale_ratio01%x%~x1
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_b
 
-set mode01nam=%~n1_waifu2x-noise-Lv%noise_level01%%~x1
+set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%%~x1
 set mode01var=-m noise --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_c
 
-set mode01nam=%~n1_waifu2x-%mode01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-scale-%model01%-%scale_ratio01%x%~x1
 set mode01var=-m scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
@@ -342,19 +338,19 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_af
-set mode01nam=%~n1_waifu2x-noise_scale-Lv%noise_level01%-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scale_ratio01%x%~x1
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
 :nam_bf
 
-set mode01nam=%~n1_waifu2x-noise-Lv%noise_level01%%~x1
+set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%%~x1
 set mode01var=-m noise --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
 :nam_cf
 
-set mode01nam=%~n1_waifu2x-scale-%scale_ratio01%x%~x1
+set mode01nam=%~n1_waifu2x-scale-%model01%-%scale_ratio01%x%~x1
 set mode01var=-m scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamf
 
