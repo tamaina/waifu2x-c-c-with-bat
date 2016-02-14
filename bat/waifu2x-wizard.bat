@@ -39,7 +39,15 @@ set outfolder=waifued
 
 
 
-
+:choice000
+choice /N /C AB /T %waitingtime% /D B /M "[model]モデルを選択[A:anime_style_art_rgb(アニメなど)/B:photo(写真など)]"
+if errorlevel 2 (
+ set model01=photo
+ echo -photo(写真)
+ goto choice00
+ )
+ set model01=anime_style_art_rgb
+ echo -anime_style_art_rgb(アニメなど)
 :choice00
 choice /C YN /T %waitingtime% /D Y /M "[usew2x]caffe/converter-cppどちらを使用するか自動で決定しますか"
 if "%errorlevel%" == "1" (
@@ -57,6 +65,7 @@ if errorlevel 2 (
  set ccchoice=caffe
  echo -caffeバージョン
  )
+
 :choice01
 choice /C YN /T %waitingtime% /D Y /M "[auto_scale]ノイズ除去機能はjpeg画像のみで作動させますか"
 if errorlevel 2 goto choice02
@@ -68,9 +77,11 @@ goto choice02kakunin
 choice /C YN /T %waitingtime% /D Y /M "[noise]ノイズを除去しますか"
 if errorlevel 2 (
  set noisechoice=no
+ echo -しない
  goto choice02a
  )
 set noisechoice=yes
+echo -する
 choice /N /C 12 /T %waitingtime% /D Y /M "[noise_level]ノイズ除去レベルを入力[1/2]"
 set noise_level=%errorlevel%
 
@@ -78,9 +89,11 @@ set noise_level=%errorlevel%
 choice /C YN /T %waitingtime% /D Y /M "[scale]拡大しますか"
 if errorlevel 2 (
  set scalechoice=no
+ echo -しない
  goto choicetovarm
  )
 set scalechoice=yes
+echo -する
 set /P scale_ratio01=拡大率を半角数字で入力[小数可]:
 
 :choicetovarm
@@ -134,7 +147,7 @@ choice /C YN /T %waitingtime% /D N /M "[caffe]入力する画像の拡張子を指定しますか
 if errorlevel 2 (
  echo -しない
  set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
- goto choice07
+ goto choice06a
  )
  echo -する
 set /P inexli01=入力画像の拡張子を入力("."は要りません/":"で区切ります/"端"は区切り記号を【入れません】)
@@ -144,10 +157,11 @@ choice /C YN /T %waitingtime% /D N /M "[共通]出力フォルダ名を変更しますか？ 初期
 
 if errorlevel 2 (
  echo -しない
- gotto choice07
+ goto choice07
  )
  echo -する
 set /P outfolder=出力フォルダ名変更(何も書かないと同じフォルダに出力します)
+
 :choice07
 echo 以上で設定は終わりです。
 choice /C YN /T %waitingtime% /D Y /M "処理を開始しますか？Nを押すと最初から設定します。"
@@ -161,7 +175,6 @@ echo %~1
 :準備
 
 setlocal enabledelayedexpansion
-
 set process01=gpu
 set datcdd=%~d0
 set datcdp=%~p0
@@ -391,16 +404,19 @@ if /I "%~x1" == ".jpg" (
  
 :nam_aa
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONama
 
 :nam_ba
 
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%.%out_ext01%
+set mode01var=-m noise --noise_level %noise_level01%
 goto EONama
 
 :nam_ca
 
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01var=-m scale --noise_level --scale_ratio %scale_ratio01%
 goto EONama
 
 :EONama
@@ -413,7 +429,7 @@ echo. >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します... >>%logname%.log 2>>&1
 echo %DATE% %TIME% "%~1"の変換を開始します...
 
-waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" %otheropca01% >>%logname%.log 2>>&1
+waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i %~1 -o "%~dp1\%outfolder%\%mode01nam%" %otheropca01% >>%logname%.log 2>>&1
 
 set w2xcERROR=%ERRORLEVEL%
 
@@ -586,16 +602,19 @@ if /I "%~x1" == ".jpg" (
  
 :nam_afa
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%-%scale_ratio01%x.%out_ext01%
+set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONamfa
 
 :nam_bfa
 
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-Lv%noise_level01%.%out_ext01%
+set mode01var=-m noise --noise_level %noise_level01%
 goto EONamfa
 
 :nam_cfa
 
 set mode01nam=%~n1_waifu2x-caffe-%mode01%-%scale_ratio01%x.%out_ext01%
+set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONamfa
 
 :EONamfa
