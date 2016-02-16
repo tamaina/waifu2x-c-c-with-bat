@@ -49,11 +49,11 @@ if %L2b% LSS 0 set /a L2b=L2b+100
 rem 二けた強制表示
 rem if %L2b% LSS 10 set L2b=0%L2b%
 
-SET /a DPS=%H2b%*3600+%M2b%*60+%S2b%
-SET DPS2=%DPSb%.%L2b%
+SET /a DPSb=%H2b%*3600+%M2b%*60+%S2b%
+SET DPS2b=%DPSb%.%L2b%
 
-set DPS_STAMP=%H2b%:%M2b%:%S2b%
-set DPS_STAMP2=%DPS_STAMPb%.%L2b%
+set DPS_STAMPb=%H2b%:%M2b%:%S2b%
+set DPS_STAMP2b=%DPS_STAMPb%.%L2b%
 
 goto EOF
 
@@ -62,4 +62,6 @@ echo 開始時間：%Tb%
 echo 終了時間：%T1b%
 echo 経過時間：%DPS_STAMPb%
 echo 経過秒数：%DPS2b%
+
+
 :EOF

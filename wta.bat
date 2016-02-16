@@ -49,11 +49,11 @@ if %L2a% LSS 0 set /a L2a=L2a+100
 rem ìÒÇØÇΩã≠êßï\é¶
 rem if %L2a% LSS 10 set L2a=0%L2a%
 
-SET /a DPS=%H2a%*3600+%M2a%*60+%S2a%
-SET DPS2=%DPSa%.%L2a%
+SET /a DPSa=%H2a%*3600+%M2a%*60+%S2a%
+SET DPS2a=%DPSa%.%L2a%
 
-set DPS_STAMP=%H2a%:%M2a%:%S2a%
-set DPS_STAMP2=%DPS_STAMPa%.%L2a%
+set DPS_STAMPa=%H2a%:%M2a%:%S2a%
+set DPS_STAMP2a=%DPS_STAMPa%.%L2a%
 
 goto EOF
 
