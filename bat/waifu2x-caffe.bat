@@ -87,15 +87,15 @@ set outfolder=waifued
 :=============================================================
 :
 :使用するwaifu2x[bat独自]
-:Which use cpp or caffe?[This batch's own mode]
+:Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-converter
+set usewaifu=waifu2x-caffe
 
 :使用するwaifu2xを選択します。
 :
 : waifu2x-converter_x64 (cpp64bit)
-: waifu2x-converter     (cpp32bit)
+: waifu2x-converter     (cpp32bit/64bit自動選択)
 : waifu2x-caffe-cui     (caffe)
 :
 :上記以外を入力するとエラーを吐きます。
@@ -238,7 +238,7 @@ if "%usewaifu%" == "" (
  )
 :===========================================================================================================================================
 :shiwake
-pushd "%~1"
+@pushd "%~1"
 set pushderrorlv=%ErrorLevel%
 if "%pushderrorlv%" GEQ "1" (
  set folder=false
@@ -269,14 +269,11 @@ if "%folder%" == "true" (
 
 
 :namer
-echo %~x1
-pause
 if "%out_ext01%" NEQ "" (
  set exte=.%out_ext01%
  ) else (
  set exte=%~x1
  )
- echo %exte%
 if "%mode01%" == "auto_scale" goto nam_auto
 if "%mode01%" == "noise_scale" goto nam_a
 if "%mode01%" == "noise" goto nam_b
@@ -312,15 +309,75 @@ goto EONam
 goto end
 :===========================================================================================================================================
 
+:dow2x
+
+call wtb.bat START
+
+call :namer "%~1"
+
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します...
+
+
+if "!usewaifu:converter=!" NEQ "!usewaifu!" (
+!usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
+set w2xERROR=!ERRORLEVEL!
+) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
+!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" -l %inexli01% -e %ex:~1% %otheropca01% >>"%logname%.log" 2>>&1
+set w2xERROR=!ERRORLEVEL!
+) else (
+echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
+echo Error！！！ 0x00
+exit /b
+)
+
+if "!w2xERROR!" GEQ "1" (
+ if "!autochoosecc!" == "step1" (
+  set usewaifu=waifu2x-converter_x64
+  set autochoosecc=step2
+  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>"%logname%.log" 2>>&1
+  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
+  goto dow2x
+ ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
+  if "!process01!" == "gpu" (
+  set process01=cpu
+  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。 >>"%logname%.log" 2>>&1
+  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。
+  goto dow2x
+  ) else (
+  echo Error！！！ 0x01 >>"%logname%.log" 2>>&1
+  echo Error！！！ 0x01
+  exit /b
+  )
+ ) else (
+  echo Error！！！ 0x02 >>"%logname%.log" 2>>&1
+  echo Error！！！ 0x02
+  exit /b
+ )
+ ) else (
+ echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
+ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
+ echo 生成画像名:!mode01nam!
+ )
+ call wtb.bat STOP
+ echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ call wtb.bat PRINT >>"%logname%.log" 2>>&1
+ echo "%~1"変換時間
+ call wtb.bat PRINT
+
+goto end
 
 :===========================================================================================================================================
 
 :w2x_file
 call wtb.bat START
 
-set ex=%~x1
 :inexli01にあってるか確認する
 setlocal
+set ex=%~x1
 for /F "delims=:" %%a in ("%inexli01%") do (
 if /I "%ex%" == ".%%a" set excheckr=1
  )
@@ -336,68 +393,8 @@ if "%excheckr%" == "1" (
  )
 :okayex
 
-call :namer "%~1"
+call :dow2x "%~1"
 
-echo.
-echo. >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%~1"の変換を開始します... [ファイルモード] >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%~1"の変換を開始します... [ファイルモード]
-
-if "%usewaifu:converter=hoge%" NEQ "%usewaifu%" (
-
-%usewaifu% --model_dir ".\models\%model01%" %mode01var% -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" %otheropco01% >>"%logname%.log" 2>>&1
-set w2xERROR=%ERRORLEVEL%
-
-) else if "%usewaifu:caffe=hoge%" NEQ "%usewaifu%" (
-
-waifu2x-caffe-cui -p %process01% --model_dir ".\models\%model01%" %mode01var% -i "%~1" -o "%~dp1\%outfolder%\%mode01nam%" -l %inexli01% -e %ex:0,1% %otheropca01% >>"%logname%.log" 2>>&1
-echo %ERRORLEVEL%
-set w2xERROR=%ERRORLEVEL%
-echo %w2xERROR%
-pause
-
-) else (
-
-echo Error！！！ >>"%logname%.log" 2>>&1
-echo Error！！！
-goto Finish_w2x
-
-)
-
-if "%w2xERROR%" GEQ "1" (
- if "%autochoosecc%" == "step1" (
-  set usewaifu=waifu2x-converter_x64
-  set autochoosecc=step2
-  echo %DATE% %TIME% caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>"%logname%.log" 2>>&1
-  echo %DATE% %TIME% caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
-  goto w2x_file
- ) else if "%usewaifu:caffe=hoge%" NEQ "%usewaifu%" (
-   if "%process01%" == "gpu" (
-  set process01=cpu
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。 >>"%logname%.log" 2>>&1
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。
-  goto w2x_file
-  ) else (
-  echo Error！！！ >>"%logname%.log" 2>>&1
-  echo Error！！！
-  goto Finish_w2x
-  )
-  ) else (
-  echo Error！！！ >>"%logname%.log" 2>>&1
-  echo Error！！！
-  goto Finish_w2x
- )
- ) else (
- echo %DATE% %TIME% "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
- echo 生成画像名:%mode01nam% >>"%logname%.log" 2>>&1
- echo %DATE% %TIME% "%~nx1"の変換作業が正常に終了しました。
- echo 生成画像名:%mode01nam%
- )
-  call wtb.bat STOP
- echo "%~1"変換時間 >>"%logname%.log" 2>>&1
- call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo "%~1"変換時間
- call wtb.bat PRINT
 :nextforex
  shift
  if "%~1" == "" goto Finish_w2x
@@ -417,9 +414,7 @@ if "%subf01%" == "true" (
 shift
 if "%~1" == "" goto Finish_w2x
 goto shiwake
-
-
-
+ 
 :w2xf1
 popd
 
@@ -428,65 +423,9 @@ if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>"%logname%.log" 2>>&1
 
 mkdir "%~dp1\%outfolder%"
 
-call wtb.bat START
-
-call :namer "%~1"
-
-echo.
-echo. >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します...
-
-
-if "!usewaifu:converter=!" NEQ "!usewaifu!" (
-!usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
-set w2xERROR=!ERRORLEVEL!
-) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
-!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" -l %inexli01% -e %ex:0,1% %otheropca01% >>"%logname%.log" 2>>&1
-set w2xERROR=!ERRORLEVEL!
-) else (
-echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
-echo Error！！！ 0x00
-goto Finish_w2x
-)
-
-if "!w2xERROR!" GEQ "1" (
- if "!autochoosecc!" == "step1" (
-  set usewaifu=waifu2x-converter_x64
-  set autochoosecc=step2
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>"%logname%.log" 2>>&1
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
-  goto w2xf1
- ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
-  if "!process01!" == "gpu" (
-  set process01=cpu
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。 >>"%logname%.log" 2>>&1
-  echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。
-  goto w2xf1
-  ) else (
-  echo Error！！！ 0x01 >>"%logname%.log" 2>>&1
-  echo Error！！！ 0x01
-  goto Finish_w2x
-  )
- ) else (
-  echo Error！！！ 0x02 >>"%logname%.log" 2>>&1
-  echo Error！！！ 0x02
-  goto Finish_w2x
- )
- ) else (
- echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
- echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
- echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
- echo 生成画像名:!mode01nam!
- )
-  call wtb.bat STOP
- echo "%~1"変換時間 >>"%logname%.log" 2>>&1
- call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo "%~1"変換時間
- call wtb.bat PRINT
+call :dow2x "%~1"
 
 goto end
- 
 :===========================================================================================================================================
 
 :Finish_w2x
