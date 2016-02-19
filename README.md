@@ -57,6 +57,7 @@ w2x群と同じbatフォルダに入っています。
 1. ImageMagicとexiftoolを導入してください。(導入方法はググってください)
 導入する際に、両方の実行ファイルがあるフォルダにパスを通してください。
     * ImageMagicは、インストールウィザードのどこかにDirectoryがなんちゃらっていう選択肢があるので、そのチェックマークを有効にすると手っ取り早いです
+    * ExifToolは、名前をexiftool.exeに改名してください。
 2. JapanColor2011Coated.iccをダウンロードします。
     * http://japancolor.jp/icc.html **規約をよく読もう！**
 3. JapanColor2011Coated.iccを右クリックメニューからインストール
