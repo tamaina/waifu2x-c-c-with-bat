@@ -42,8 +42,10 @@ set scale_ratio01=2
 
 set noise_level01=2
 
-: 1,2 どちらかを選択
+: 1,2,super どちらかを選択
 : 1のほうが除去量が少なく現物に忠実
+: superは0.9のめちゃくちゃ強力なモデルです。
+: superはphoto版が用意されていません。
 :=============================================================
 :
 :変換する拡張子[-l --input_extention_list]
@@ -171,6 +173,7 @@ set otheropco01=
 
 
 
+
 :===========================================================================================================================================
 :準備
 setlocal enabledelayedexpansion
@@ -212,6 +215,20 @@ cd .. >>"%logname%.log" 2>>&1
 
 :next1
 call wta.bat START
+
+:super処理
+if "%noise_level01%" == "super" (
+ if "%model01%" == "photo" (
+ echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。
+ echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。 >>"%logname%.log" 2>>&1
+ set model01=super-anime_style_art_rgb
+ set noise_level01=2
+ ) else if not "%model01:anime_style_art=hoge%" == "%model01%" (
+ set model01=super-%model01%
+ set noise_level01=2
+ )
+)
+
 
 :モード設定
 if "%usewaifu%" == "" (
@@ -264,7 +281,7 @@ if "%folder%" == "true" (
  goto Finish_w2x
  )
  
- 
+
 :===========================================================================================================================================
 
 
