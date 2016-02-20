@@ -1,6 +1,7 @@
 # waifu2x-c/c with bat
 
 waifu2x-converter-cppは速いけど、コマンドプロンプトへの入力が煩わしいし、フロントエンドは更新されない・・・。そもそもフォルダの処理に対応してない・・・。
+
 caffeはGUIがあるけれど、遅いし、ファイルの一括処理が面倒・・・。
 
 かといって速い本家( http://waifu2x.udp.jp/ )やw2x-multi( http://waifu2x.me/ )などのwebサービスを利用すると、ダウンロードをする手間が煩わしい。
@@ -9,9 +10,9 @@ caffeはGUIがあるけれど、遅いし、ファイルの一括処理が面倒
 
 ## 概要
 
-- waifu2xのtanakamura氏版cppバージョンとlltcggie氏版caffeバージョンを纏めました。
-- batフォルダ内に一括変換に便利なバッチファイルが3種類入っております。
-- 本体の最新版が出たらなるべく早く入れ替えます。
+- batフォルダ内に一括変換に便利なバッチファイルが入っています。
+- waifu2xのtanakamura氏版cppバージョンとlltcggie氏版caffeバージョンが入っています。
+- 本体は、最新版が出たらなるべく早く入れ替えます。
 - gitに不慣れなためすべてのファイルが新規になっています。ご了承ください。
 - I'm sorry, but I won't make English version.
 
