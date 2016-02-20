@@ -1,5 +1,6 @@
-caffe版ライセンス→LICENSE-ca.txt
-cpp版ライセンス→LICENSE-co.txt
+このセットは、本家( https://github.com/nagadomi/waifu2x/blob/master/LICENSE )、converter( https://github.com/tanakamura/waifu2x-converter-cpp/blob/master/LICENSE )、およびcaffe( https://github.com/lltcggie/waifu2x-caffe/blob/master/LICENSE )の3つのライセンスに基づいて公開されています。
+
+また、それ以外の独自で作成したファイルは以下のライセンスで提供されます。
 
 The MIT License (MIT)
 

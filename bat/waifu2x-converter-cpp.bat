@@ -218,6 +218,7 @@ call wta.bat START
 
 :super処理
 if "%noise_level01%" == "super" (
+ if not "%usewaifu:converter=hage%" == "%usewaifu%" 
  if "%model01%" == "photo" (
  echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。
  echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。 >>"%logname%.log" 2>>&1

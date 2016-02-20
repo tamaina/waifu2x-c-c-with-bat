@@ -92,7 +92,7 @@ set outfolder=waifued
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-caffe-cui
+set usewaifu=waifu2x-caffe
 
 :使用するwaifu2xを選択します。
 :
@@ -218,6 +218,7 @@ call wta.bat START
 
 :super処理
 if "%noise_level01%" == "super" (
+ if not "%usewaifu:converter=hage%" == "%usewaifu%" 
  if "%model01%" == "photo" (
  echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。
  echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。 >>"%logname%.log" 2>>&1
