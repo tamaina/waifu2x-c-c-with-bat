@@ -92,7 +92,7 @@ set outfolder=waifued
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-caffe
+set usewaifu=
 
 :使用するwaifu2xを選択します。
 :
