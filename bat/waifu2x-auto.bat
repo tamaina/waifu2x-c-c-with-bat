@@ -22,7 +22,7 @@ set mode01=auto_scale
 :モデル選択[--model_dir]
 :
 
-set model01=anime_style_art_rgb
+set model01=photo
 
 : anime_style_art (二次画像 輝度のみ)
 : anime_style_art_rgb (二次画像 RGBで)
@@ -171,8 +171,8 @@ set otheropco01=
 
 
 
+:===========================================================================================================================================
 :準備
-
 setlocal enabledelayedexpansion
 set firstprocess=true
 set process01=gpu
@@ -378,15 +378,17 @@ call wtb.bat START
 :inexli01にあってるか確認する
 setlocal
 set ex=%~x1
-for /F "delims=:" %%a in ("%inexli01%") do (
-if /I "%ex%" == ".%%a" set excheckr=1
- )
+set n=0
+for %%a in (%inexli01::= %) do (
+if /I "%ex%" == ".%%a" set excheckr=true
+)
 
-if "%excheckr%" == "1" (
+if "!excheckr!" == "true" (
  endlocal
  goto okayex
  ) else (
- endlocal
+endlocal
+
  echo "%~nx1"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。 >>"%logname%.log" 2>>&1
  echo "%~nx1"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。
  goto nextforex
