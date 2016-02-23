@@ -29,12 +29,60 @@ set model01=photo
 : photo (写真)
 :=============================================================
 :
-:拡大率[--scale_ratio]
+:拡大率(+自動設定)[--scale_ratio]+[bat独自]
 :
+:************************************************************
+:【①】自動倍率計算モードon/off
+
+set scaleauto=true
+
+:拡大率を自動で計算して変換後の幅または高さをそろえます。
+:true(有効)/false(無効)
+:
+:有効にする場合、ImageMagicが必要です。
+:
+:trueにした場合、必ず②③④の設定をしてください。
+:falseにした場合、⑤の設定が適用されます。
+:
+:************************************************************
+:【②】目標幅
+
+set scaleauto_width01=1920
+
+:【③】目標高さ
+
+set scaleauto_height01=1080
+
+:変換後のサイズを設定します(単位:px)。②は幅、③は高さです。
+:両方を指定すると、両方の基準を満たす画像が作成されます。
+:つまり、変換前の画像と②③の縦横比が違った場合、
+:変換前の画像の画像の短いほうが②(③)と同じになります。
+:
+:②③のどちらかを0にすると、設定した方の基準で揃えます。
+:両方を0にすると、scaleauto=falseと同じになります。
+:
+:************************************************************
+:【④】精度
+
+set accuracy=10
+
+:倍率の精度を指定します。
+:精度を高くするほど目標値には近くなりますが、
+:そのぶん処理が長くかかるようになります。
+:
+:(例)     1→2倍       (小数第一位を繰り上げ)
+:        10→1.2倍     (　〃　二　　〃　　　)
+:       100→1.23倍    (　〃　三　　〃　　　)
+:      1000→1.235倍   (　〃　四　　〃　　　)
+:     10000→1.2346倍  (　〃　五　　〃　　　)
+:
+:************************************************************
+:【⑤】手動倍率設定
 
 set scale_ratio01=2
 
-: 数字(単位 倍)小数点可
+: 自動倍率計算が無効のときに使います。waifu2xのデフォルトです。
+: 数字(単位:倍)小数点可
 :=============================================================
 :
 :ノイズ除去レベル[--noise_level]
@@ -92,7 +140,7 @@ set outfolder=waifued
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-caffe-cui
+set usewaifu=waifu2x-converter
 
 :使用するwaifu2xを選択します。
 :
@@ -172,16 +220,22 @@ set otheropco01=
 
 
 
-
-
 :===========================================================================================================================================
 :準備
+if "%~1" == "" exit
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
+cd ..
 set firstprocess=true
 set process01=gpu
 set hoge=*.%inexli01::= *.%
+mkdir "%~dp0\buffer"
+set multset_txt=%~dp0\buffer\mset-%~n0.txt
+set noerror_txt=%~dp0\buffer\noerror.txt
+type NUL > "%multset_txt%"
+type NUL > "%noerror_txt%" 2>&1
 
-@pushd %~1
+pushd "%~1" > "%noerror_txt%" 2>&1
 set pushderrorlv=%ErrorLevel%
 if "%pushderrorlv%" GEQ "1" (
  goto s_file
@@ -193,24 +247,20 @@ if "%pushderrorlv%" GEQ "1" (
 
 :s_file
 
-mkdir "%~dp1\%outfolder%"
+mkdir "%~dp1\%outfolder%" > "%noerror_txt%" 2>&1
 set logname=%~dp1\%outfolder%\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
 echo %DATE% %TIME% "%~dp1\%outfolder%"を作成(すでにある場合その旨が書かれています)
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d %~dp0 >>"%logname%.log" 2>>&1
-cd .. >>"%logname%.log" 2>>&1
 goto next1
 
 :s_folder
 
-mkdir "%~dpn1\%outfolder%"
+mkdir "%~dpn1\%outfolder%" > "%noerror_txt%" 2>&1
 set logname=%~dpn1\%outfolder%\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
 echo %DATE% %TIME% "%~dpn1\%outfolder%"を作成(すでにある場合その旨が書かれています)
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
-cd /d "%~dp0" >>"%logname%.log" 2>>&1
-cd .. >>"%logname%.log" 2>>&1
 
 
 :next1
@@ -229,8 +279,28 @@ if "%noise_level01%" == "super" (
  )
 )
 
+:モード設定-自動倍数設定
 
-:モード設定
+if "%scaleauto%" == "true" (
+ if "%scaleauto_width01%" == "0" (
+  if "%scaleauto_height01%" == "0" (
+  set scaleauto=false
+  )
+ )
+)
+
+if "%scaleauto%" == "true" (
+identify -help > "%noerror_txt%" 2>&1
+if errorlevel 2 (
+ echo ImageMagickがインストールされていません。%auto_scale01%倍で変換します。
+ echo ImageMagickがインストールされていません。%auto_scale01%倍で変換します。 >>"%logname%.log" 2>>&1
+ echo ImageMagickのインストール方法はググってください。
+ set scaleauto=false
+)
+)
+:next2
+
+:モード設定-使用waifu
 if "%usewaifu%" == "" (
   if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
   
@@ -253,11 +323,13 @@ if "%usewaifu%" == "" (
  ) else (
  goto shiwake
  )
+
+
+
 :===========================================================================================================================================
 :shiwake
-@pushd "%~1"
-set pushderrorlv=%ErrorLevel%
-if "%pushderrorlv%" GEQ "1" (
+pushd "%~1" > "%noerror_txt%" 2>&1
+if errorlevel 1 (
  set folder=false
  if "%~x1" == "" (
  echo Error！！！ >>"%logname%.log" 2>>&1
@@ -324,11 +396,32 @@ goto EONam
 
 :EONam
 goto end
+
+:===========================================================================================================================================
+
+:multiplier
+
+CScript "%~dp0\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > "%noerror_txt%" 2>&1
+
+set /P scale_ratio01= < "%multset_txt%"
+type NUL > "%multset_txt%
+
+goto end
+
 :===========================================================================================================================================
 
 :dow2x
 
 call wtb.bat START
+
+if "%scaleauto%" == "true" call :multiplier "%~1"
+if "!scale_ratio01!" == "wrong" (
+echo 拡大の必要はありません。 >>"%logname%.log" 2>>&1
+echo 拡大の必要はありません。
+exit /b
+) else if "%scaleauto%" == "true" (
+echo 自動計算結果 : %scale_ratio01%
+)
 
 call :namer "%~1"
 
@@ -421,7 +514,7 @@ call :dow2x "%~1"
  
 :===========================================================================================================================================
 :w2x_folder
-@pushd "%~dpn1"
+pushd "%~dpn1" > "%noerror_txt%" 2>&1
 
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
 if "%subf01%" == "true" (
@@ -440,7 +533,7 @@ popd
 set cafname=%~n1
 if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>"%logname%.log" 2>>&1
 
-mkdir "%~dp1\%outfolder%"
+mkdir "%~dp1\%outfolder%" > "%noerror_txt%" 2>&1
 
 call :dow2x "%~1"
 
@@ -464,6 +557,10 @@ echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
+
+Del "%multset_txt%"
+Del "%noerror_txt%"
+
 pause
 exit
 :end
