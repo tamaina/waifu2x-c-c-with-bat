@@ -29,10 +29,8 @@ var mag_candid_h   = target_height / img_height;
 WSH.echo( mag_candid_w );
 WSH.echo( mag_candid_h );
 
-if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w < mag_candid_h ) {
- var OutMagnific    = "Height";
-} else if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w > mag_candid_h ) {
- var OutMagnific    = "Width";
+if ( mag_candid_w <= 1 && mag_candid_h <= 1 ) {
+ var Magnific    = 1;
 } else if ( target_width == 0 ){
  var Magnific    = mag_candid_h;
 } else if ( target_height == 0 ){
@@ -44,19 +42,20 @@ if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w < mag_candid_h ) {
 } else {
  WSH.echo( "error!" );
 }
-WSH.echo( OutMagnific );
-WSH.echo( Magnific );
+WSH.echo( "Magnific:" + Magnific );
 
-if ( OutMagnific == "Height" ){
-WSH.echo( OutMagnific );
-} else if ( OutMagnific == "Width" ){
-WSH.echo( OutMagnific );
-} else {
- var OutMagnific       = Math.ceil( Magnific * accuracy ) / accuracy;
- var echoval           = "Ž©“®”{—¦ŒvŽZŒ‹‰Ê:" + OutMagnific + "”{";
- WSH.echo( echoval );
+var OutMagnific       = 0;
+var i = 0;
+var POW = 0;
+while ( Magnific > POW ) {
+ var POW = Math.pow( 2 , i );
+ i++;
+ WSH.echo( POW );
 }
+i--;
+var OutMagnific       = Math.pow( 2 , i );
 
+WSH.echo( "Out:" + OutMagnific );
 var fs = new ActiveXObject( "Scripting.FileSystemObject" );
 var f = fs.OpenTextFile( multset_file , 2 , true );
 f.WriteLine( OutMagnific );

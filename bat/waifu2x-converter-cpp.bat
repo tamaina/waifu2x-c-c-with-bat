@@ -36,13 +36,13 @@ set model01=photo
 
 set scaleauto=false
 
-:拡大率を自動で計算して変換後の幅または高さをそろえます。
+:拡大率を自動で計算してすべての画像の幅または高さをそろえます。
 :true(有効)/false(無効)
 :
 :有効にする場合、ImageMagicが必要です。
 :
-:trueにした場合、必ず②③④の設定をしてください。
-:falseにした場合、⑤の設定が適用されます。
+:trueにした場合、必ず②③の設定をしてください。
+:falseにした場合、④の設定が適用されます。
 :
 :************************************************************
 :【②】目標幅
@@ -63,24 +63,8 @@ set scaleauto_height01=1080
 :
 :入力画像が②③でつくった長方形より大きかったときは、
 :縮小します。
-:
 :************************************************************
-:【④】精度
-
-set accuracy=10
-
-:倍率の精度を指定します。
-:精度を高くするほど目標値には近くなりますが、
-:そのぶん処理が長くかかるようになります。
-:
-:(例)     1→2倍       (小数第一位を繰り上げ)
-:        10→1.2倍     (　〃　二　　〃　　　)
-:       100→1.23倍    (　〃　三　　〃　　　)
-:      1000→1.235倍   (　〃　四　　〃　　　)
-:     10000→1.2346倍  (　〃　五　　〃　　　)
-:
-:************************************************************
-:【⑤】手動倍率設定
+:【④】手動倍率設定
 
 set scale_ratio01=2
 
@@ -363,10 +347,12 @@ if "%folder%" == "true" (
 
 :namer
 
+if "!scale_ratio01!" LEQ "1" goto nam_b
 if "%mode01%" == "auto_scale" goto nam_auto
 if "%mode01%" == "noise_scale" goto nam_a
 if "%mode01%" == "noise" goto nam_b
 if "%mode01%" == "scale" goto nam_c
+
 
 :nam_auto
 if /I "%~x1" == ".jpg" (
@@ -378,20 +364,20 @@ if /I "%~x1" == ".jpg" (
  )
  
 :nam_a
-set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scale_ratio01%x!exte!
+set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_b
 
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
-set mode01var=-m noise --noise_level %noise_level01% --scale_ratio %scale_ratio01%
+set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
 :nam_c
 
-set mode01nam=%~n1_waifu2x-scale-%model01%-%scale_ratio01%x!exte!
-set mode01var=-m scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
+set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
+set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
 
 :EONam
@@ -416,12 +402,13 @@ goto end
 :reduction
 
 if "!scale_ratio01!" == "Height" (
-convert "%~1" -resize x%scaleauto_height01% "%~dp1\%outfolder%\%~n1_reduced!exte!"
+mogrify -resize x%scaleauto_height01% "%~1" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "Width" (
-convert "%~1" -resize %scaleauto_width01%x "%~dp1\%outfolder%\%~n1_reduced!exte!"
+mogrify -resize %scaleauto_width01%x "%~1" >>"%logname%.log" 2>>&1
 )
 
 goto end
+
 :===========================================================================================================================================
 
 :dow2x
@@ -435,23 +422,6 @@ if "%out_ext01%" NEQ "" (
  )
 
 if "%scaleauto%" == "true" call :multiplier "%~1"
-echo !scale_ratio01!
-if "!scale_ratio01!" == "Height" (
-echo 自動倍率計算結果 : !scale_ratio01! 倍
-echo ImageMagickで縮小します。 >>"%logname%.log" 2>>&1
-echo ImageMagickで縮小します。
-call :reduction "%~1"
-exit /b
-) else if "!scale_ratio01!" == "Width" (
-echo 自動倍率計算結果 : !scale_ratio01! 倍
-echo ImageMagickで縮小します。 >>"%logname%.log" 2>>&1
-echo ImageMagickで縮小します。
-call :reduction "%~1"
-exit /b
-)
-) else if "%scaleauto%" == "true" (
-echo 自動計算結果 : !scale_ratio01!
-)
 
 call :namer "%~1"
 
@@ -497,6 +467,15 @@ if "!w2xERROR!" GEQ "1" (
   exit /b
  )
  ) else (
+ if "%scaleauto%" == "true" (
+  if "%scaleauto_width01%" LEQ "%scaleauto_height01%"  (
+ set scale_ratio01=Height
+  call :reduction "%~dp1\%outfolder%\!mode01nam!"
+  ) else if "%scaleauto_width01%" GEQ "%scaleauto_height01%" (
+ set scale_ratio01=Width
+  call :reduction "%~dp1\%outfolder%\!mode01nam!"
+  )
+ )
  echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
  echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
