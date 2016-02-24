@@ -341,13 +341,60 @@ if "%folder%" == "true" (
  goto Finish_w2x
  )
  
+:===========================================================================================================================================
+
+:reduction
+
+if "%scale_ratio01%" == "1" (
+ goto noexpant
+) else if "%scale_ratio01%" == "0" (
+ goto noexpant
+)
+
+if "%scaleauto_width01%" LEQ "%scaleauto_height01%" (
+ set scale_ratio01=0
+) else if "%scaleauto_width01%" GEQ "%scaleauto_height01%" (
+ set scale_ratio01=1
+)
+
+if "!scale_ratio01!" == "0" (
+mogrify -resize x%scaleauto_height01% "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+) else if "!scale_ratio01!" == "1" (
+mogrify -resize %scaleauto_width01%x "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+)
+
+goto end
+
+:noexpant
+if "!scale_ratio01!" == "0" (
+convert "%~1" -resize x%scaleauto_height01% "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+) else if "!scale_ratio01!" == "1" (
+convert "%~1" -resize %scaleauto_width01%x "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+)
+
+goto end
 
 :===========================================================================================================================================
 
+:success
+
+if "%scaleauto%" == "true" (
+ call :reduction "%~1"
+)
+
+
+echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
+echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
+echo 生成画像名:!mode01nam!
+
+goto end
+
+:===========================================================================================================================================
 
 :namer
 
-if "!scale_ratio01!" LEQ "1" goto nam_b
+if "!scale_ratio01!" LEQ "1" goto nam_noiseorno
 if "%mode01%" == "auto_scale" goto nam_auto
 if "%mode01%" == "noise_scale" goto nam_a
 if "%mode01%" == "noise" goto nam_b
@@ -362,7 +409,34 @@ if /I "%~x1" == ".jpg" (
  ) else (
  goto nam_c
  )
- 
+:nam_noiseorno
+if "%mode01%" == "auto_scale" (
+if /I "%~x1" == ".jpg" (
+ goto nam_b
+ ) else if /I "%~x1" == ".jpeg" (
+ goto nam_b
+ ) else (
+ set nowaifu=true
+ set mode01nam=%~n1_reduced!exte!
+ call :success "%~1"
+ call wtb.bat STOP
+ echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ call wtb.bat PRINT >>"%logname%.log" 2>>&1
+ echo "%~1"変換時間
+ call wtb.bat PRINT
+ exit /b
+ )
+) else (
+ set nowaifu=true
+ set mode01nam=%~n1_reduced!exte!
+ call :success "%~1"
+ call wtb.bat STOP
+ echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ call wtb.bat PRINT >>"%logname%.log" 2>>&1
+ echo "%~1"変換時間
+ call wtb.bat PRINT
+ exit /b
+)
 :nam_a
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
@@ -399,18 +473,6 @@ goto end
 
 :===========================================================================================================================================
 
-:reduction
-
-if "!scale_ratio01!" == "Height" (
-mogrify -resize x%scaleauto_height01% "%~1" >>"%logname%.log" 2>>&1
-) else if "!scale_ratio01!" == "Width" (
-mogrify -resize %scaleauto_width01%x "%~1" >>"%logname%.log" 2>>&1
-)
-
-goto end
-
-:===========================================================================================================================================
-
 :dow2x
 
 call wtb.bat START
@@ -424,6 +486,7 @@ if "%out_ext01%" NEQ "" (
 if "%scaleauto%" == "true" call :multiplier "%~1"
 
 call :namer "%~1"
+if "!nowaifu!" == "true" exit /b
 
 echo.
 echo. >>"%logname%.log" 2>>&1
@@ -467,19 +530,7 @@ if "!w2xERROR!" GEQ "1" (
   exit /b
  )
  ) else (
- if "%scaleauto%" == "true" (
-  if "%scaleauto_width01%" LEQ "%scaleauto_height01%"  (
- set scale_ratio01=Height
-  call :reduction "%~dp1\%outfolder%\!mode01nam!"
-  ) else if "%scaleauto_width01%" GEQ "%scaleauto_height01%" (
- set scale_ratio01=Width
-  call :reduction "%~dp1\%outfolder%\!mode01nam!"
-  )
- )
- echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
- echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
- echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
- echo 生成画像名:!mode01nam!
+ call :success "%~1"
  )
  call wtb.bat STOP
  echo "%~1"変換時間 >>"%logname%.log" 2>>&1

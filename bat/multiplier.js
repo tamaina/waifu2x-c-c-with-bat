@@ -29,8 +29,10 @@ var mag_candid_h   = target_height / img_height;
 WSH.echo( mag_candid_w );
 WSH.echo( mag_candid_h );
 
-if ( mag_candid_w <= 1 && mag_candid_h <= 1 ) {
- var Magnific    = 1;
+if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w <= mag_candid_h ) {
+ var Magnific    = "0"; //height
+} else if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w > mag_candid_h ) {
+ var Magnific    = "1"; //width
 } else if ( target_width == 0 ){
  var Magnific    = mag_candid_h;
 } else if ( target_height == 0 ){
@@ -44,6 +46,9 @@ if ( mag_candid_w <= 1 && mag_candid_h <= 1 ) {
 }
 WSH.echo( "Magnific:" + Magnific );
 
+if ( Magnific <= 1 ) {
+ var OutMagnific = Magnific;
+} else {
 var OutMagnific       = 0;
 var i = 0;
 var POW = 0;
@@ -54,6 +59,7 @@ while ( Magnific > POW ) {
 }
 i--;
 var OutMagnific       = Math.pow( 2 , i );
+}
 
 WSH.echo( "Out:" + OutMagnific );
 var fs = new ActiveXObject( "Scripting.FileSystemObject" );
