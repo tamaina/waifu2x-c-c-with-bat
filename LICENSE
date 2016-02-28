@@ -1,4 +1,11 @@
-このセットは、本家( https://github.com/nagadomi/waifu2x/blob/master/LICENSE )、converter( https://github.com/tanakamura/waifu2x-converter-cpp/blob/master/LICENSE )、およびcaffe( https://github.com/lltcggie/waifu2x-caffe/blob/master/LICENSE )の3つのライセンスに基づいて公開されています。
+このセットは、
+waifu2x本家( https://github.com/nagadomi/waifu2x/blob/master/LICENSE )
+converter( https://github.com/tanakamura/waifu2x-converter-cpp/blob/master/LICENSE )
+caffe( https://github.com/lltcggie/waifu2x-caffe/blob/master/LICENSE )
+7-zip license( https://sevenzip.osdn.jp/license.txt )
+SoX( LICENSE.GPL.SoX.txt )
+の4つのライセンスに基づいて公開されています。
+各ライセンスの表記はリンクに対応させていただきます。
 
 また、それ以外の独自で作成したファイルは以下のライセンスで提供されます。
 

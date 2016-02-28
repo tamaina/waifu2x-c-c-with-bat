@@ -30,9 +30,11 @@ set model01=photo
 :=============================================================
 :
 :拡大率(+自動設定)[--scale_ratio]+[bat独自]
+:About "scale_ratio"
 :
 :************************************************************
 :【①】自動倍率計算モードon/off
+:Auto Calculate Magnification
 
 set scaleauto=false
 
@@ -46,10 +48,12 @@ set scaleauto=false
 :
 :************************************************************
 :【②】目標幅
+:Target Width
 
 set scaleauto_width01=1920
 
 :【③】目標高さ
+:Target Height
 
 set scaleauto_height01=1080
 
@@ -64,12 +68,12 @@ set scaleauto_height01=1080
 :入力画像が②③でつくった長方形より大きかったときは、
 :縮小します。
 :************************************************************
-:【④】手動倍率設定
+:【④】手動倍率設定[--scale_ratio]
 
 set scale_ratio01=2
 
 : 自動倍率計算が無効のときに使います。waifu2xのデフォルトです。
-: 数字(単位:倍)小数点可
+: 数字(単位:倍)小数点可。
 :=============================================================
 :
 :ノイズ除去レベル[--noise_level]
@@ -77,8 +81,8 @@ set scale_ratio01=2
 
 set noise_level01=2
 
-: 1,2,super どちらかを選択
-: 1のほうが除去量が少なく現物に忠実
+: 1,2,super どれかを選択
+: 1のほうが除去量が少なく現物に忠実です。
 : superは0.9のめちゃくちゃ強力なモデルです。
 : superはphoto版が用意されていません。
 :=============================================================
@@ -111,18 +115,6 @@ set subf01=true
 : true/false(有効/無効)
 :=============================================================
 :
-:出力フォルダ名[bat独自]
-:Output folder name[This batch's own mode]
-:
-
-set outfolder=waifued
-
-:そんな深いことは考えずwaifuedと名付けましたがやっぱ変かも
-:しれないので変更できるようにしてみたり
-:
-:空白にすれば同じフォルダに出力できるんじゃないかと思う
-:=============================================================
-:
 :使用するwaifu2x[bat独自]
 :Which do you use cpp or caffe?[This batch's own mode]
 :
@@ -139,12 +131,65 @@ set usewaifu=waifu2x-converter
 :何も書かないと、自動的に判断します。
 :=============================================================
 :
+:出力設定[bat独自]
+:About Output
+:
+:************************************************************
+:【①】出力フォルダモード
+:Folder output mode setting
+
+set folderoutmode=2
+
+:以下の数字で指定してください。
+:  0 →入力フォルダと同じフォルダに出力します。
+:       ②の設定は無視されます。
+:  1 →②で指定した名前のフォルダが入力されたフォルダごとに
+:       生成されます。
+:  2 →②で指定した名前のフォルダが、一番最初に入力されたファイル
+:       の上の階層につくられ、その中にまとめて画像が入ります。
+:       もとのファイル構造は維持されます。
+:  3 → 2 のフォルダを③で設定した形式に圧縮します。
+:************************************************************
+:【②】出力フォルダ名
+:Output folder name[This batch's own mode]
+:
+
+set outfoldernameset=waifued
+
+:出力フォルダ名を指定します。
+:使われ方は①の設定によって異なります。
+:再生できるのは.wavのみです。
+:************************************************************
+:【③】圧縮形式
+:Compression Format Setting
+:
+
+set compformat=7z
+
+:圧縮形式を指定します。拡張子の.は不要です。
+:対応形式は"7-Zip"が対応している
+:  7z, XZ, BZIP2, GZIP, TAR, ZIP, WIM
+:です。
+:=============================================================
+:
+:処理終了時に音を鳴らす
+:BEEP
+:
+
+set endwav="C:\Windows\Media\Ring03.wav"
+
+:終了時に音を鳴らします。要らない場合は空にしてください。
+:"～"で囲った形でフルパスで指定してください。
+:形式について：Soxを使っていますが、wavでしか試していません。
+:=============================================================
+:
 :その他オプション(上級者用設定)
 :
-:          ↓ca(上)がcaffe co(下)がconverter-cpp
+:          ↓ca(上)がcaffe co(中)がconverter-cpp
 set otheropca01=
 set otheropco01=
-
+set otherop7z01=
+:          ↑7z(下)が7-zip
 :なにかご自分で指定したいオプションがあれば指定してください。
 :コマンドプロンプトで打ち込む形で記入してください。
 :=============================================================
@@ -210,18 +255,28 @@ set otheropco01=
 :===========================================================================================================================================
 :準備
 if "%~1" == "" exit
-echo "%~1"
+Title %~nx0 : waifu2x now denoising!
+
 setlocal enabledelayedexpansion
+
 cd /d "%~dp0"
 cd ..
+
+set thebat="%~0"
+set batdp=%~dp0
+set batnx=%~nx0
+
 set firstprocess=true
 set process01=gpu
 set hoge=*.%inexli01::= *.%
-mkdir "%~dp0\buffer"
-set multset_txt=%~dp0\buffer\mset-%~n0.txt
-set noerror_txt=%~dp0\buffer\noerror.txt
+
+set multset_txt=%TMP%mset-%~n0.txt
+set fname_txt=%TMP%fset-%~n0.txt
+set noerror_txt=%TMP%noerror.txt
+
 type NUL > "%multset_txt%"
-type NUL > "%noerror_txt%" 2>&1
+type NUL > "%fname_txt%"
+type NUL > "%noerror_txt%"
 
 pushd "%~1" > "%noerror_txt%" 2>&1
 set pushderrorlv=%ErrorLevel%
@@ -235,19 +290,41 @@ if "%pushderrorlv%" GEQ "1" (
 
 :s_file
 
-mkdir "%~dp1\%outfolder%" > "%noerror_txt%" 2>&1
-set logname=%~dp1\%outfolder%\w2xresult
+if "%folderoutmode%" == "2" (
+set outfoldercd=%~dp1\%outfoldernameset%
+set outfolder=%~dp1\%outfoldernameset%
+) else if "%folderoutmode%" == "3" (
+set outfoldercd=%TMP%\%~n0\%outfoldernameset%
+set outfolder=%TMP%\%~n0\%outfoldernameset%
+set lastzip=%~dp1\%outfoldernameset%.%compformat%
+) else (
+set outfolder=%~dp1\%outfoldernameset%
+)
+
+mkdir "%outfolder%" > "%noerror_txt%" 2>&1
+set logname=%outfolder%\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%~dp1\%outfolder%"を作成(すでにある場合その旨が書かれています)
+echo %DATE% %TIME% "%outfolder%"を作成(すでにある場合その旨が書かれています)
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
 goto next1
 
 :s_folder
 
-mkdir "%~dpn1\%outfolder%" > "%noerror_txt%" 2>&1
-set logname=%~dpn1\%outfolder%\w2xresult
+if "%folderoutmode%" == "2" (
+set outfoldercd=%~dp1%outfoldernameset%
+set outfolder=%~dp1%outfoldernameset%
+) else if "%folderoutmode%" == "3" (
+set outfoldercd=%TMP%\%~n0\%outfoldernameset%
+set outfolder=%TMP%\%~n0\%outfoldernameset%
+set lastzip=%~dp1%outfoldernameset%.%compformat%
+) else (
+set outfolder=%~dp1%outfoldernameset%
+)
+
+mkdir "%outfolder%" > "%noerror_txt%" 2>&1
+set logname=%outfolder%\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%~dpn1\%outfolder%"を作成(すでにある場合その旨が書かれています)
+echo %DATE% %TIME% "%outfolder%"を作成(すでにある場合その旨が書かれています)
 echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
 
 
@@ -358,18 +435,18 @@ if "%scaleauto_width01%" LEQ "%scaleauto_height01%" (
 )
 
 if "!scale_ratio01!" == "0" (
-mogrify -resize x%scaleauto_height01% "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+mogrify -resize x%scaleauto_height01% "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-mogrify -resize %scaleauto_width01%x "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+mogrify -resize %scaleauto_width01%x "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
 
 :noexpant
 if "!scale_ratio01!" == "0" (
-convert "%~1" -resize x%scaleauto_height01% "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+convert "%~1" -resize x%scaleauto_height01% "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-convert "%~1" -resize %scaleauto_width01%x "%~dp1\%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+convert "%~1" -resize %scaleauto_width01%x "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
@@ -463,7 +540,7 @@ goto end
 
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
-CScript "%~dp0\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > "%noerror_txt%" 2>&1
+CScript "%batdp%\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > "%noerror_txt%" 2>&1
 
 
 set /P scale_ratio01= < "%multset_txt%"
@@ -475,7 +552,15 @@ goto end
 
 :dow2x
 
-call wtb.bat START
+
+
+if "%folderoutmode%" == "0" (
+set outfolder=%~dp1%
+) else if "%folderoutmode%" == "1" (
+set outfolder=%~dp1%\%outfoldernameset%
+)
+
+mkdir "!outfolder!" > "%noerror_txt%" 2>&1
 
 if "%out_ext01%" NEQ "" (
  set exte=.%out_ext01%
@@ -495,10 +580,10 @@ echo !DATE! !TIME! "%~1"の変換を開始します...
 
 
 if "!usewaifu:converter=!" NEQ "!usewaifu!" (
-!usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
+!usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "!outfolder!\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
-!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "%~dp1\%outfolder%\!mode01nam!" -l %inexli01% -e %ex:~1% %otheropca01% >>"%logname%.log" 2>>&1
+!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "!outfolder!\!mode01nam!" -l %inexli01% -e %ex:~1% %otheropca01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else (
 echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
@@ -542,6 +627,24 @@ goto end
 
 :===========================================================================================================================================
 
+:outfilename_a
+
+CScript "%batdp%\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" "%fname_txt%" "false" > "%noerror_txt%" 2>&1
+set /P outfolder= < "%fname_txt%"
+type NUL > "%fname_txt%
+
+goto end
+
+:outfilename_b
+
+CScript "%batdp%\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" %fname_txt% "%~2" > "%noerror_txt%" 2>&1
+set /P outfolder= < "%fname_txt%"
+type NUL > "%fname_txt%
+
+goto end
+
+:===========================================================================================================================================
+
 :w2x_file
 call wtb.bat START
 
@@ -565,6 +668,12 @@ endlocal
  )
 :okayex
 
+if "%folderoutmode%" == "2" (
+call :outfilename_a "%~1"
+) else if "%folderoutmode%" == "3" (
+call :outfilename_a "%~1"
+)
+
 call :dow2x "%~1"
 
 :nextforex
@@ -574,14 +683,14 @@ call :dow2x "%~1"
  
 :===========================================================================================================================================
 :w2x_folder
-pushd "%~dpn1" > "%noerror_txt%" 2>&1
 
+pushd "%~1"
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
 if "%subf01%" == "true" (
- echo サブフォルダ処理モード >>"%logname%.log" 2>>&1
- for /R %%t in (%hoge%) do call :w2xf1 "%%~t"
+ rem サブフォルダ処理モード
+ for /R %%t in (%hoge%) do call :w2xf1 "%%~t" true "%~1"
  ) else (
- for %%t in (%hoge%) do call :w2xf1 "%~dpn1\%%~t"
+ for %%t in (%hoge%) do call :w2xf1 "%~1\%%~t"
  )
 shift
 if "%~1" == "" goto Finish_w2x
@@ -589,11 +698,23 @@ goto shiwake
  
 :w2xf1
 popd
-
+call wtb.bat START
 set cafname=%~n1
 if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>"%logname%.log" 2>>&1
 
-mkdir "%~dp1\%outfolder%" > "%noerror_txt%" 2>&1
+if "%folderoutmode%" == "2" (
+if "%2" == "true" (
+call :outfilename_b "%~1" "%~3"
+) else (
+call :outfilename_a "%~1"
+)
+) else if "%folderoutmode%" == "3" (
+if "%2" == "true" (
+call :outfilename_b "%~1" "%~3"
+) else (
+call :outfilename_a "%~1"
+)
+)
 
 call :dow2x "%~1"
 
@@ -603,24 +724,49 @@ goto end
 :Finish_w2x
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo -------------------------------------------
-echo Finish: %~nx0 >>"%logname%.log" 2>>&1
+echo Finish: %batnx% >>"%logname%.log" 2>>&1
 echo これで読み込まれた全ての画像の変換が完了しました。 >>"%logname%.log" 2>>&1
-
 echo これで読み込まれた全ての画像の変換が完了しました。
+
 call wta.bat STOP
 call wta.bat PRINT >>"%logname%.log" 2>>&1
 call wta.bat PRINT
 
+
+if "%folderoutmode%" == "3" (
+echo !DATE! !TIME! 7-ZIPで圧縮を開始します。
+echo !DATE! !TIME! 7-ZIPで圧縮をしました。 >>"%logname%.log" 2>>&1
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
+if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
+7za64 a "%lastzip%" "%outfoldercd%"
+) else (
+7za a "%lastzip%" "%outfoldercd%"
+)
 
-Del "%multset_txt%"
-Del "%noerror_txt%"
+echo !DATE! !TIME! 7-ZIPで圧縮が完了しました。
+echo "%lastzip%"
+rd /S /Q "%outfoldercd%" > "%noerror_txt%" 2>&1
+) else (
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo. >>"%logname%.log" 2>&1
+echo. >>"%logname%.log" 2>&1
+echo. >>"%logname%.log" 2>&1
+echo. >>"%logname%.log" 2>&1
+)
 
+set AUDIODRIVER=waveaudio
+
+play %endwav% > "%noerror_txt%" 2>&1
+
+Del "%multset_txt%" > "%noerror_txt%" 2>&1
+Del "%fname_txt%" > "%noerror_txt%" 2>&1
 pause
+Del "%noerror_txt%"
 exit
 :end
