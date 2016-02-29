@@ -256,9 +256,12 @@ set otherop7z01=
 :èÄîı
 if "%~1" == "" exit
 Title %~nx0 : waifu2x now denoising!
-
 setlocal enabledelayedexpansion
-
+pushd "%~dp0"
+pushd ..
+Path=%PATH%;%CD%
+popd
+popd
 cd /d "%~dp0"
 cd ..
 
