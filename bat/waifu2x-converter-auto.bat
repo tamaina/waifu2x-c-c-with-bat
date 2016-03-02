@@ -36,7 +36,7 @@ set model01=photo
 :【①】自動倍率計算モードon/off
 :Auto Calculate Magnification
 
-set scaleauto=true
+set scaleauto=auto
 
 :拡大率を自動で計算してすべての画像の幅または高さをそろえます。
 :true(有効)/false(無効)
@@ -183,6 +183,25 @@ set endwav="C:\Windows\Media\Ring03.wav"
 :形式について：Soxを使っていますが、wavでしか試していません。
 :=============================================================
 :
+:Twitter向けモード
+:TwitterMode
+:
+
+set twittermode=false
+
+: true(有効)/false(無効)
+:
+:有効にするにはImageMagickが必要です。
+:trueにすると以下のことを実行します。
+: ① jpegにならないように、左上を少しだけ透過します。
+: ② pngquantでファイルサイズを5MB以下に圧縮します。
+:
+:Twittermode処理完了後の画像はファイル名の先頭にfortwitter_が
+:付きます。
+:Twittermode処理前の画像も保存されます。
+:=============================================================
+:
+:
 :その他オプション(上級者用設定)
 :
 :          ↓ca(上)がcaffe co(中)がconverter-cpp
@@ -304,11 +323,11 @@ set lastzip=%~dp1\%outfoldernameset%.%compformat%
 set outfolder=%~dp1\%outfoldernameset%
 )
 
-mkdir "%outfolder%" > "%noerror_txt%" 2>&1
-set logname=%outfolder%\w2xresult
+mkdir "!outfolder!" > "%noerror_txt%" 2>&1
+set logname=!outfolder!\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%outfolder%"を作成(すでにある場合その旨が書かれています)
-echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
+echo 出力フォルダ:"!outfolder!"
+echo ログ:"%logname%.log"
 goto next1
 
 :s_folder
@@ -324,11 +343,11 @@ set lastzip=%~dp1%outfoldernameset%.%compformat%
 set outfolder=%~dp1%outfoldernameset%
 )
 
-mkdir "%outfolder%" > "%noerror_txt%" 2>&1
-set logname=%outfolder%\w2xresult
+mkdir "!outfolder!" > "%noerror_txt%" 2>&1
+set logname=!outfolder!\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
-echo %DATE% %TIME% "%outfolder%"を作成(すでにある場合その旨が書かれています)
-echo %DATE% %TIME% "%logname%.log"を作成(すでにある場合は追記します。)
+echo 出力フォルダ:"!outfolder!"
+echo ログ:"%logname%.log"
 
 
 :next1
@@ -360,10 +379,11 @@ if "%scaleauto%" == "true" (
 if "%scaleauto%" == "true" (
 identify -help > "%noerror_txt%" 2>&1
 if errorlevel 2 (
- echo ImageMagickがインストールされていません。%auto_scale01%倍で変換します。
- echo ImageMagickがインストールされていません。%auto_scale01%倍で変換します。 >>"%logname%.log" 2>>&1
+ echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。
+ echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。 >>"%logname%.log" 2>>&1
  echo ImageMagickのインストール方法はググってください。
  set scaleauto=false
+ set twittermode=false
 )
 )
 :next2
@@ -438,18 +458,18 @@ if "%scaleauto_width01%" LEQ "%scaleauto_height01%" (
 )
 
 if "!scale_ratio01!" == "0" (
-mogrify -resize x%scaleauto_height01% "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+mogrify -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-mogrify -resize %scaleauto_width01%x "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+mogrify -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
 
 :noexpant
 if "!scale_ratio01!" == "0" (
-convert "%~1" -resize x%scaleauto_height01% "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+convert "%~1" -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-convert "%~1" -resize %scaleauto_width01%x "%outfolder%\!mode01nam!" >>"%logname%.log" 2>>&1
+convert "%~1" -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
@@ -462,6 +482,9 @@ if "%scaleauto%" == "true" (
  call :reduction "%~1"
 )
 
+if "%twittermode%" == "true" (
+call .\bat\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+)
 
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
@@ -519,18 +542,21 @@ if /I "%~x1" == ".jpg" (
 )
 :nam_a
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
+set mode01pngnam=forTwitter_%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_b
 
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
+set mode01pngnam=fotTwitter_%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
 set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
 :nam_c
 
 set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
+set mode01pngnam=forTwitter_%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
 
@@ -764,11 +790,12 @@ echo. >>"%logname%.log" 2>&1
 )
 
 set AUDIODRIVER=waveaudio
+Del "%multset_txt%" > "%noerror_txt%" 2>&1
+Del "%fname_txt%" > "%noerror_txt%" 2>&1
+Del "%dott_png%" > "%noerror_txt%" 2>&1
 
 play %endwav% > "%noerror_txt%" 2>&1
 
-Del "%multset_txt%" > "%noerror_txt%" 2>&1
-Del "%fname_txt%" > "%noerror_txt%" 2>&1
 pause
 Del "%noerror_txt%"
 exit

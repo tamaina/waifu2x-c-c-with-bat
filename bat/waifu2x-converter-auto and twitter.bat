@@ -36,7 +36,7 @@ set model01=photo
 :【①】自動倍率計算モードon/off
 :Auto Calculate Magnification
 
-set scaleauto=false
+set scaleauto=auto
 
 :拡大率を自動で計算してすべての画像の幅または高さをそろえます。
 :true(有効)/false(無効)
@@ -50,12 +50,12 @@ set scaleauto=false
 :【②】目標幅
 :Target Width
 
-set scaleauto_width01=1920
+set scaleauto_width01=1280
 
 :【③】目標高さ
 :Target Height
 
-set scaleauto_height01=1080
+set scaleauto_height01=1280
 
 :変換後のサイズを設定します(単位:px)。②は幅、③は高さです。
 :両方を指定すると、両方の基準を満たす画像が作成されます。
@@ -187,7 +187,7 @@ set endwav="C:\Windows\Media\Ring03.wav"
 :TwitterMode
 :
 
-set twittermode=false
+set twittermode=true
 
 : true(有効)/false(無効)
 :

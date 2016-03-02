@@ -8,7 +8,8 @@
 - SoX( リポジトリに付属 : LICENSE.GPL.SoX.txt )
 - qiitaの利用規約( http://qiita.com/terms#9 )
 - MITライセンス Copyright (c) 2016 tamaina
-の6つのライセンスに基づいて公開されています。
+- pngquant( https://github.com/pornel/pngquant/blob/master/COPYRIGHT )
+の7つのライセンスに基づいて公開されています。
 各ライセンスの内容はリンク先をご確認ください。
 また、どのファイルがどのライセンスに対応しているかは以下に記します。
 
@@ -113,3 +114,7 @@
 - wtb.bat
 
 ****
+
+### pngquant( https://github.com/pornel/pngquant/blob/master/COPYRIGHT )
+
+- pngquant.exe

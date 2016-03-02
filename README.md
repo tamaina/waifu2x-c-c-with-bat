@@ -39,6 +39,7 @@ caffeはGUIがあるけれど、遅いし、ファイルの一括処理が面倒
     - 縦/横の大きさの目標値(px)を設定して、それを満たす倍率を自動で設定します。
     - ちなみに、2の累乗倍でwaifu2xで変換してから、ImageMagickを使用して目標値に縮小しています。
 - 処理終了時に**音(wavファイル)が鳴ります**。
+- **Twitter**に投稿するのに最適な画像を作成できます。
 
 #### caffeにあってconverterにない機能
 - **入力するファイルの拡張子**の変更ができます。
@@ -54,7 +55,7 @@ caffeはGUIがあるけれど、遅いし、ファイルの一括処理が面倒
 右側にあるDownload ZIPを見つけてダウンロードしてください。
 
 ### ImageMagickを導入してください。
-v2.2.2から搭載された自動倍率計算を利用するには、ImageMagickを導入する必要があります。
+自動倍率計算やTwitterModeを利用するには、ImageMagickを導入する必要があります。
 
 1. http://www.imagemagick.org/script/binary-releases.php#windows からダウンロードします。
     - 64bit版→ ImageMagick-[バージョン]-Q16-x64-dll.exe
@@ -92,10 +93,27 @@ LICENSE.mdを参照してください。
 
 waifu2xの発展に携わったすべての方々、またbatchファイルの書き方の参考になったProgramming Field( http://pf-j.sakura.ne.jp/program/dos/doscmd/ )のジェット様に感謝します。
 
-#おまけ:画像ファイルcmyk-rgb変換bat
+# おまけ
+
+#### 使い方
+- waifu2xのbatのようにドラッグアンドドロップしてください。
+**注:おまけなのでフォルダをドラッグアンドドロップしても変換しません**
+
+## twittermode
+
+本体にあったtwittermodeだけを抜粋したものです・・・というか本体の機能自体このbatを使って動いています。
+ImageMagickが必要です。
+
+- 左上1ドットを少しだけ透明にして、twitterに載せたときjpegになるのを防ぎます。
+- 3MBを上回った場合、pngquantで軽量化します。
+  - すこし減色されますが、jpegのようなノイズが出てくるわけではありません。
+
+## 画像ファイルcmyk-rgb変換bat
+
 w2x群と同じbatフォルダに入っています。
 ImageMagickでrgbからcmykに変換するのが案外うまくいかなかったので公開。
-##初期設定
+
+###初期設定
 1. (ImageMagickと)**exiftool**を導入してください。(申し訳ないですが、導入方法やURLはググってください)
 導入する際に、両方の実行ファイルがあるフォルダにパスを通してください。
     * ExifToolは、名前をexiftool.exeに改名してください。
@@ -104,6 +122,3 @@ ImageMagickでrgbからcmykに変換するのが案外うまくいかなかっ�
 3. JapanColor2011Coated.iccを右クリックメニューからインストール
     * 解凍しないと出てこないかも
 
-##使い方
-- waifu2xのbatのようにドラッグアンドドロップしてください。
-**注:おまけなのでフォルダをドラッグアンドドロップしても変換しません**
