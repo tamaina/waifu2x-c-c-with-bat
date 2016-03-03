@@ -36,7 +36,7 @@ set model01=photo
 :【①】自動倍率計算モードon/off
 :Auto Calculate Magnification
 
-set scaleauto=auto
+set scaleauto=true
 
 :拡大率を自動で計算してすべての画像の幅または高さをそろえます。
 :true(有効)/false(無効)
@@ -50,12 +50,12 @@ set scaleauto=auto
 :【②】目標幅
 :Target Width
 
-set scaleauto_width01=1280
+set scaleauto_width01=1920
 
 :【③】目標高さ
 :Target Height
 
-set scaleauto_height01=1280
+set scaleauto_height01=1080
 
 :変換後のサイズを設定します(単位:px)。②は幅、③は高さです。
 :両方を指定すると、両方の基準を満たす画像が作成されます。
@@ -211,6 +211,7 @@ set otherop7z01=
 :          ↑7z(下)が7-zip
 :なにかご自分で指定したいオプションがあれば指定してください。
 :コマンドプロンプトで打ち込む形で記入してください。
+:ヒント:SoXはendwavに書き込めば適用されます。
 :=============================================================
 :分割の計算にも対応したいなぁとか思ったり
 :#############################################################
@@ -292,15 +293,13 @@ set firstprocess=true
 set process01=gpu
 set hoge=*.%inexli01::= *.%
 
-set multset_txt=%TMP%mset-%~n0.txt
-set fname_txt=%TMP%fset-%~n0.txt
-set noerror_txt=%TMP%noerror.txt
+set multset_txt=%TMP%\mset-%~n0.txt
+set fname_txt=%TMP%\fset-%~n0.txt
 
 type NUL > "%multset_txt%"
 type NUL > "%fname_txt%"
-type NUL > "%noerror_txt%"
 
-pushd "%~1" > "%noerror_txt%" 2>&1
+pushd "%~1" > NUL 2>&1
 set pushderrorlv=%ErrorLevel%
 if "%pushderrorlv%" GEQ "1" (
  goto s_file
@@ -323,7 +322,7 @@ set lastzip=%~dp1\%outfoldernameset%.%compformat%
 set outfolder=%~dp1\%outfoldernameset%
 )
 
-mkdir "!outfolder!" > "%noerror_txt%" 2>&1
+mkdir "!outfolder!" > NUL 2>&1
 set logname=!outfolder!\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
 echo 出力フォルダ:"!outfolder!"
@@ -343,7 +342,7 @@ set lastzip=%~dp1%outfoldernameset%.%compformat%
 set outfolder=%~dp1%outfoldernameset%
 )
 
-mkdir "!outfolder!" > "%noerror_txt%" 2>&1
+mkdir "!outfolder!" > NUL 2>&1
 set logname=!outfolder!\w2xresult
 echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
 echo 出力フォルダ:"!outfolder!"
@@ -377,7 +376,7 @@ if "%scaleauto%" == "true" (
 )
 
 if "%scaleauto%" == "true" (
-identify -help > "%noerror_txt%" 2>&1
+identify -help > NUL 2>&1
 if errorlevel 2 (
  echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。
  echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。 >>"%logname%.log" 2>>&1
@@ -416,7 +415,7 @@ if "%usewaifu%" == "" (
 
 :===========================================================================================================================================
 :shiwake
-pushd "%~1" > "%noerror_txt%" 2>&1
+pushd "%~1" > NUL 2>&1
 if errorlevel 1 (
  set folder=false
  if "%~x1" == "" (
@@ -451,9 +450,9 @@ if "%scale_ratio01%" == "1" (
  goto noexpant
 )
 
-if "%scaleauto_width01%" LEQ "%scaleauto_height01%" (
+if "%scaleauto_width01%" LSS "%scaleauto_height01%" (
  set scale_ratio01=0
-) else if "%scaleauto_width01%" GEQ "%scaleauto_height01%" (
+) else if "%scaleauto_width01%" GTR "%scaleauto_height01%" (
  set scale_ratio01=1
 )
 
@@ -479,11 +478,9 @@ goto end
 :success
 
 if "%scaleauto%" == "true" (
+ echo !DATE! !TIME! 設定した大きさに縮小します。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! 設定した大きさに縮小します。 
  call :reduction "%~1"
-)
-
-if "%twittermode%" == "true" (
-call .\bat\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
@@ -491,13 +488,22 @@ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
 
+if "%twittermode%" == "true" (
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
+ call %batdp%\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
+ echo 生成画像名:forTwitter_!mode01nam!
+)
+
 goto end
 
 :===========================================================================================================================================
 
 :namer
 
-if "!scale_ratio01!" LEQ "1" goto nam_noiseorno
+if !scale_ratio01! LEQ 1 goto nam_noiseorno
 if "%mode01%" == "auto_scale" goto nam_auto
 if "%mode01%" == "noise_scale" goto nam_a
 if "%mode01%" == "noise" goto nam_b
@@ -521,42 +527,43 @@ if /I "%~x1" == ".jpg" (
  ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
+ echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo "%~1"変換時間
+ echo .
  call wtb.bat PRINT
  exit /b
  )
 ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
+ echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo "%~1"変換時間
+ echo .
  call wtb.bat PRINT
  exit /b
 )
 :nam_a
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
-set mode01pngnam=forTwitter_%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_b
 
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
-set mode01pngnam=fotTwitter_%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
 set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
 :nam_c
 
 set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
-set mode01pngnam=forTwitter_%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
 
@@ -569,11 +576,14 @@ goto end
 
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
-CScript "%batdp%\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > "%noerror_txt%" 2>&1
-
-
+CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > NUL 2>&1
 set /P scale_ratio01= < "%multset_txt%"
 type NUL > "%multset_txt%
+if !scale_ratio01! LEQ 1 (
+echo !DATE! !TIME! 計算完了 : 拡大しません。
+) else (
+echo !DATE! !TIME! 計算完了 : %scale_ratio01%倍に拡大し、そこから縮小します。
+)
 
 goto end
 
@@ -589,7 +599,7 @@ set outfolder=%~dp1%
 set outfolder=%~dp1%\%outfoldernameset%
 )
 
-mkdir "!outfolder!" > "%noerror_txt%" 2>&1
+mkdir "!outfolder!" > NUL 2>&1
 
 if "%out_ext01%" NEQ "" (
  set exte=.%out_ext01%
@@ -647,9 +657,9 @@ if "!w2xERROR!" GEQ "1" (
  call :success "%~1"
  )
  call wtb.bat STOP
- echo "%~1"変換時間 >>"%logname%.log" 2>>&1
+ echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo "%~1"変換時間
+ echo .
  call wtb.bat PRINT
 
 goto end
@@ -658,7 +668,7 @@ goto end
 
 :outfilename_a
 
-CScript "%batdp%\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" "%fname_txt%" "false" > "%noerror_txt%" 2>&1
+CScript "%batdp%\script\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" "%fname_txt%" "false" > NUL 2>&1
 set /P outfolder= < "%fname_txt%"
 type NUL > "%fname_txt%
 
@@ -666,7 +676,7 @@ goto end
 
 :outfilename_b
 
-CScript "%batdp%\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" %fname_txt% "%~2" > "%noerror_txt%" 2>&1
+CScript "%batdp%\script\outfilename.js" "%outfoldercd%" "%outfoldernameset%" "%~dp1" %fname_txt% "%~2" > NUL 2>&1
 set /P outfolder= < "%fname_txt%"
 type NUL > "%fname_txt%
 
@@ -772,14 +782,14 @@ echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
-7za64 a "%lastzip%" "%outfoldercd%"
+7za64 a "%lastzip%" "%outfoldercd%" %otherop7z01%
 ) else (
-7za a "%lastzip%" "%outfoldercd%"
+7za a "%lastzip%" "%outfoldercd%"%otherop7z01%
 )
 
 echo !DATE! !TIME! 7-ZIPで圧縮が完了しました。
 echo "%lastzip%"
-rd /S /Q "%outfoldercd%" > "%noerror_txt%" 2>&1
+rd /S /Q "%outfoldercd%" > NUL 2>&1
 ) else (
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
@@ -789,14 +799,14 @@ echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
 )
 
-set AUDIODRIVER=waveaudio
-Del "%multset_txt%" > "%noerror_txt%" 2>&1
-Del "%fname_txt%" > "%noerror_txt%" 2>&1
-Del "%dott_png%" > "%noerror_txt%" 2>&1
+Del "%multset_txt%"
+Del "%fname_txt%"
 
-play %endwav% > "%noerror_txt%" 2>&1
+set AUDIODRIVER=waveaudio
+if not "%endwav%" == "" (
+play %endwav%
+)
 
 pause
-Del "%noerror_txt%"
 exit
 :end
