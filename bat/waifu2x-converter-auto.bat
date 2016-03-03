@@ -450,7 +450,7 @@ if "%scale_ratio01%" == "1" (
  goto noexpant
 )
 
-if %scaleauto_width01% LSS %scaleauto_height01% (
+if %scaleauto_width01% LEQ %scaleauto_height01% (
 mogrify -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if %scaleauto_width01% GTR %scaleauto_height01% (
 mogrify -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
