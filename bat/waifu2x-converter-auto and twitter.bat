@@ -50,12 +50,12 @@ set scaleauto=true
 :y‡Az–Ú•W•
 :Target Width
 
-set scaleauto_width01=1920
+set scaleauto_width01=1280
 
 :y‡Bz–Ú•W‚‚³
 :Target Height
 
-set scaleauto_height01=1080
+set scaleauto_height01=1280
 
 :•ÏŠ·Œã‚ÌƒTƒCƒY‚ðÝ’è‚µ‚Ü‚·(’PˆÊ:px)B‡A‚Í•A‡B‚Í‚‚³‚Å‚·B
 :—¼•û‚ðŽw’è‚·‚é‚ÆA—¼•û‚ÌŠî€‚ð–ž‚½‚·‰æ‘œ‚ªì¬‚³‚ê‚Ü‚·B
@@ -450,18 +450,11 @@ if "%scale_ratio01%" == "1" (
  goto noexpant
 )
 
-if "%scaleauto_width01%" LSS "%scaleauto_height01%" (
- set scale_ratio01=0
-) else if "%scaleauto_width01%" GTR "%scaleauto_height01%" (
- set scale_ratio01=1
-)
-
-if "!scale_ratio01!" == "0" (
+if %scaleauto_width01% LSS %scaleauto_height01% (
 mogrify -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
-) else if "!scale_ratio01!" == "1" (
+) else if %scaleauto_width01% GTR %scaleauto_height01% (
 mogrify -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
-
 goto end
 
 :noexpant
