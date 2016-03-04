@@ -22,7 +22,7 @@ set mode01=auto_scale
 :モデル選択[--model_dir]
 :
 
-set model01=photo
+set model01=anime_style_art_rgb
 
 : anime_style_art (二次画像 輝度のみ)
 : anime_style_art_rgb (二次画像 RGBで)
@@ -50,12 +50,12 @@ set scaleauto=true
 :【②】目標幅
 :Target Width
 
-set scaleauto_width01=1280
+set scaleauto_width01=1920
 
 :【③】目標高さ
 :Target Height
 
-set scaleauto_height01=1280
+set scaleauto_height01=1080
 
 :変換後のサイズを設定します(単位:px)。②は幅、③は高さです。
 :両方を指定すると、両方の基準を満たす画像が作成されます。
@@ -98,12 +98,12 @@ set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
 :
 :出力拡張子[-e --output_extention]
 :
-
-set out_ext01=png
-
-: 指定しない場合は空(=の次は改行)にする。 スペースを入れるな
-: デフォルトはpng。" . "(ドット)をつけない
-: 指定できるのは一つです(このbatの仕様です)
+:              png
+:
+:pngのみ対応します。
+:
+:png以外はサポート対象外です。
+:
 :=============================================================
 :
 :フォルダを処理するときサブフォルダも処理する[bat独自]
@@ -285,6 +285,7 @@ popd
 cd /d "%~dp0"
 cd ..
 
+set out_ext01=png
 set thebat="%~0"
 set batdp=%~dp0
 set batnx=%~nx0
@@ -295,9 +296,13 @@ set hoge=*.%inexli01::= *.%
 
 set multset_txt=%TMP%\mset-%~n0.txt
 set fname_txt=%TMP%\fset-%~n0.txt
+set width_txt=%TMP%\widthset-%~n0.txt
+set height_txt=%TMP%\heightset-%~n0.txt
 
 type NUL > "%multset_txt%"
 type NUL > "%fname_txt%"
+type NUL > "%width_txt%"
+type NUL > "%height_txt%"
 
 pushd "%~1" > NUL 2>&1
 set pushderrorlv=%ErrorLevel%
@@ -505,10 +510,13 @@ if "%mode01%" == "scale" goto nam_c
 
 :nam_auto
 if /I "%~x1" == ".jpg" (
+ set jpegfile=true
  goto nam_a
  ) else if /I "%~x1" == ".jpeg" (
+ set jpegfile=true
  goto nam_a
  ) else (
+ set jpegfile=false
  goto nam_c
  )
 :nam_noiseorno
@@ -544,18 +552,21 @@ if /I "%~x1" == ".jpg" (
  exit /b
 )
 :nam_a
+set scaling=true
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
 :nam_b
 
+set scaling=false
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
 set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
 :nam_c
 
+set scaling=true
 set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
@@ -566,10 +577,12 @@ goto end
 :===========================================================================================================================================
 
 :multiplier
-
+if "%scaleauto%" == "true" (
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
-CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" %accuracy% > NUL 2>&1
+)
+CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" "%width_txt%" "%height_txt%" > NUL 2>&1
+if "%scaleauto%" == "true" (
 set /P scale_ratio01= < "%multset_txt%"
 type NUL > "%multset_txt%
 if !scale_ratio01! LEQ 1 (
@@ -577,39 +590,99 @@ echo !DATE! !TIME! 計算完了 : 拡大しません。
 ) else (
 echo !DATE! !TIME! 計算完了 : %scale_ratio01%倍に拡大し、そこから縮小します。
 )
+)
+set /P imagewidth= < "%width_txt%"
+set /P imageheight= < "%height_txt%"
+type NUL > "%width_txt%"
+type NUL > "%height_txt%"
 
 goto end
 
 :===========================================================================================================================================
 
-:dow2x
+:alpha
 
+echo !DATE! !TIME! alpha情報の解析を行います...
+echo !DATE! !TIME! alpha情報の解析を行います... >>"%logname%.log" 2>>&1
 
+set whiteimage=%TMP%\white-%~n1.png
+set blackimage=%TMP%\black-%~n1.png
+set alphaimage=%TMP%\alpha-%~n1.png
+set waifualpha_nam=waifualpha-%~n1.png
+set waifualpha=%TMP%\%waifualpha_nam%
+set sourcenoalpha_nam=noalphasource-%~n1.png
+set sourcenoalpha=%TMP%\%sourcenoalpha_nam%
+set waifuednoalpha_nam=waifuedsource-%~n1.png
+set waifuednoalpha=%TMP%\%waifuednoalpha_nam%
+set doingalpha=true
 
-if "%folderoutmode%" == "0" (
-set outfolder=%~dp1%
-) else if "%folderoutmode%" == "1" (
-set outfolder=%~dp1%\%outfoldernameset%
+convert -size %imagewidth%x%imageheight% xc:white "!whiteimage!"
+convert -size %imagewidth%x%imageheight% xc:black "!blackimage!"
+composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
+composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
+set CMD_IDENTIFY=identify -format "%%k" "!alphaimage!"
+for /f "usebackq delims=" %%a in (`%CMD_IDENTIFY%`) do set image_mean=%%a
+
+if "!image_mean!" == "1" (
+echo !DATE! !TIME! alpha情報はありませんでした。 >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! alpha情報はありませんでした。
+set alphais=false
+) else (
+echo !DATE! !TIME! alpha情報が見つかりました。
+echo !DATE! !TIME! alpha情報が見つかりました。 >>"%logname%.log" 2>>&1
+set alphais=true
+composite -compose over "%~1" "!whiteimage!" "!sourcenoalpha!"
+ echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
+ echo alpha情報をwaifu2xで拡大します...
+setlocal
+set mode01var=-m scale --scale_ratio %scale_ratio01%
+set model01=anime_style_art
+set outfolder=%TMP%
+set mode01nam=!waifualpha_nam!
+set otheropco=
+set otheropca=
+set twittermode=false
+call :command_w2x "!alphaimage!"
+endlocal
+ echo !DATE! !TIME! 本体をwaifu2xで処理します... >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! 本体をwaifu2xで処理します...
+setlocal
+set outfolder=%TMP%
+set mode01nam=!waifuednoalpha_nam!
+set otheropco=
+set otheropca=
+set twittermode=false
+call :command_w2x "!sourcenoalpha!"
+endlocal
+ echo !DATE! !TIME! alpha情報と本体を合成します...
+ echo !DATE! !TIME! alpha情報と本体を合成します...  >>"%logname%.log" 2>>&1
+composite "!waifualpha!" "!waifuednoalpha!" -compose CopyOpacity -alpha activate "!outfolder!\!mode01nam!"
+echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
+echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
+echo 生成画像名:!mode01nam!
+if "%twittermode%" == "true" (
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
+ call %batdp%\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
+ echo 生成画像名:forTwitter_!mode01nam!
 )
+set allis=okay
+Del "!waifualpha!"
+Del "!waifuednoalpha!"
+Del "!sourcenoalpha!"
+)
+Del "!whiteimage!"
+Del "!blackimage!"
+Del "!alphaimage!"
+set doingalpha=false
+goto end
 
-mkdir "!outfolder!" > NUL 2>&1
+:===========================================================================================================================================
 
-if "%out_ext01%" NEQ "" (
- set exte=.%out_ext01%
- ) else (
- set exte=%~x1
- )
-
-if "%scaleauto%" == "true" call :multiplier "%~1"
-
-call :namer "%~1"
-if "!nowaifu!" == "true" exit /b
-
-echo.
-echo. >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します...
-
+:command_w2x
 
 if "!usewaifu:converter=!" NEQ "!usewaifu!" (
 !usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "!outfolder!\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
@@ -622,6 +695,9 @@ echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
 echo Error！！！ 0x00
 exit /b
 )
+
+:===========================================================================================================================================
+
 
 if "!w2xERROR!" GEQ "1" (
  if "!autochoosecc!" == "step1" (
@@ -649,6 +725,46 @@ if "!w2xERROR!" GEQ "1" (
  ) else (
  call :success "%~1"
  )
+
+goto end
+
+:===========================================================================================================================================
+
+:dow2x
+
+if "%folderoutmode%" == "0" (
+set outfolder=%~dp1%
+) else if "%folderoutmode%" == "1" (
+set outfolder=%~dp1%\%outfoldernameset%
+)
+
+mkdir "!outfolder!" > NUL 2>&1
+
+if "%out_ext01%" NEQ "" (
+ set exte=.%out_ext01%
+ ) else (
+ set exte=%~x1
+ )
+
+call :multiplier "%~1"
+
+call :namer "%~1"
+if "!nowaifu!" == "true" exit /b
+
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します...
+
+if "%scaling%" == "true" (
+if "%jpegfile%" == "false" (
+call :alpha "%~1"
+if "%allis%" == "okay" exit /b
+)
+)
+
+call :command_w2x "%~1"
+
  call wtb.bat STOP
  echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
@@ -794,6 +910,8 @@ echo. >>"%logname%.log" 2>&1
 
 Del "%multset_txt%"
 Del "%fname_txt%"
+Del "%width_txt%"
+Del "%height_txt%"
 
 set AUDIODRIVER=waveaudio
 if not "%endwav%" == "" (
