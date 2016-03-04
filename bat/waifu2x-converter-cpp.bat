@@ -759,9 +759,9 @@ echo !DATE! !TIME! "%~1"‚Ì•ÏŠ·‚ðŠJŽn‚µ‚Ü‚·...
 if "%scaling%" == "true" (
 if "%jpegfile%" == "false" (
 call :alpha "%~1"
+)
+)
 if "%allis%" == "okay" exit /b
-)
-)
 
 call :command_w2x "%~1"
 
