@@ -17,7 +17,9 @@
 
 ### 独自作成:MITライセンス
 
-- batフォルダの全ての中身
+- batフォルダの中身(以下特記)
+  - waifu2x.icoは、https://github.com/nagadomi/waifu2x/blob/master/images/miku_bg.png に縮小などの改変をしたものが含まれています。
+  - 借用したコードはこの範囲に含みません。別途URLが直近に示されています。
 - readme.md
 - howtouse.md
 
