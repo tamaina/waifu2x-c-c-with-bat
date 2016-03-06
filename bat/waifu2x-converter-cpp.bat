@@ -616,6 +616,8 @@ set waifuednoalpha_nam=waifuedsource-%~n1.png
 set waifuednoalpha=%TMP%\%waifuednoalpha_nam%
 set doingalpha=true
 
+set debugmode=false
+
 convert -size %imagewidth%x%imageheight% xc:white "!whiteimage!"
 convert -size %imagewidth%x%imageheight% xc:black "!blackimage!"
 composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
@@ -631,12 +633,11 @@ set alphais=false
 echo !DATE! !TIME! alpha情報が見つかりました。
 echo !DATE! !TIME! alpha情報が見つかりました。 >>"%logname%.log" 2>>&1
 set alphais=true
-composite -compose over "%~1" "!whiteimage!" "!sourcenoalpha!"
+convert "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
  echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
  echo alpha情報をwaifu2xで拡大します...
 setlocal
 set mode01var=-m scale --scale_ratio %scale_ratio01%
-set model01=anime_style_art
 set outfolder=%TMP%
 set mode01nam=!waifualpha_nam!
 set otheropco=
@@ -656,7 +657,7 @@ call :command_w2x "!sourcenoalpha!"
 endlocal
  echo !DATE! !TIME! alpha情報と本体を合成します...
  echo !DATE! !TIME! alpha情報と本体を合成します...  >>"%logname%.log" 2>>&1
-composite "!waifualpha!" "!waifuednoalpha!" -compose CopyOpacity -alpha activate "!outfolder!\!mode01nam!"
+composite "!waifualpha!" "!waifuednoalpha!" -alpha off -compose CopyOpacity "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
@@ -670,13 +671,17 @@ if "%twittermode%" == "true" (
  echo 生成画像名:forTwitter_!mode01nam!
 )
 set allis=okay
+if "%debugmode%" == "false" (
 Del "!waifualpha!"
 Del "!waifuednoalpha!"
 Del "!sourcenoalpha!"
 )
+)
+if "%debugmode%" == "false" (
 Del "!whiteimage!"
 Del "!blackimage!"
 Del "!alphaimage!"
+)
 set doingalpha=false
 goto end
 
@@ -732,6 +737,11 @@ goto end
 
 :dow2x
 
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します...
+
 if "%folderoutmode%" == "0" (
 set outfolder=%~dp1%
 ) else if "%folderoutmode%" == "1" (
@@ -750,11 +760,6 @@ call :multiplier "%~1"
 
 call :namer "%~1"
 if "!nowaifu!" == "true" exit /b
-
-echo.
-echo. >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します...
 
 if "%scaling%" == "true" (
 if "%jpegfile%" == "false" (
