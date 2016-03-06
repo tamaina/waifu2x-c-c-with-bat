@@ -205,7 +205,7 @@ set twittermode=false
 :deal even alpha on this batchfile
 :
 
-set alphaswitch=true
+set alphaswitch=false
 
 :true(—LŒø)/false(–³Œø)
 :false‚É‚·‚é‚ÆA‰æ‘œ‚ª‚»‚Ì‚Ü‚Üwaifu2x‚É‘—‚ç‚ê‚Ü‚·B

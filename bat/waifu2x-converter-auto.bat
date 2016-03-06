@@ -201,6 +201,20 @@ set twittermode=false
 :Twittermode処理前の画像も保存されます。
 :=============================================================
 :
+:Alpha情報をバッチファイルで操作する
+:deal even alpha on this batchfile
+:
+
+set alphaswitch=true
+
+:true(有効)/false(無効)
+:falseにすると、画像がそのままwaifu2xに送られます。
+:trueにすると、alpha情報を本体が分けてwaifu2xで処理します。
+:
+:きれいになる画像もあれば、汚くなる画像もあるため、画像との相性に
+:注意して使い分けてください。
+:=============================================================
+:
 :
 :その他オプション(上級者用設定)
 :
@@ -760,10 +774,11 @@ call :multiplier "%~1"
 
 call :namer "%~1"
 if "!nowaifu!" == "true" exit /b
-
+if "%alphaswitch%" == "true" (
 if "%scaling%" == "true" (
 if "%jpegfile%" == "false" (
 call :alpha "%~1"
+)
 )
 )
 if "%allis%" == "okay" exit /b
