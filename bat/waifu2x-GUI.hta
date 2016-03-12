@@ -1,0 +1,497 @@
+<html><head>
+<hta:application icon="waifu2x.ico">
+<meta http-equiv="x-ua-compatible" content="IE=10">
+<style>
+body         {
+              font-weight:bold;
+              font-family:"Yu Gothic","Meryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+              margin-left:10%;
+              margin-right:10%;
+             }
+input        {
+              font-weight:bold,medium,normal;
+              font-family:"Meryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+             }
+button       {
+              font-weight:bold,medium,normal;
+              font-family:"Meryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+             }
+select       {
+              font-weight:bold,medium,normal;
+              font-family:"Meryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+             }
+h1           {
+              font-family:"Meryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+              font-weight:heavy,bold;
+             }
+th           {
+              font-weight:bold;
+              text-align:right;
+             }
+fieldset     {
+              padding:10px;
+              height:100%;
+              margin-bottom:5px;
+             }
+table        {
+              width:100%;
+             }
+td           {
+              width:50%;
+             }
+p            {
+              margin:10px;
+             }
+#rightcontent{
+              float:right;
+              width:49%;
+              margin-left:1px;
+             }
+#left_content{
+              float:left;
+              width:49%;
+              margin-right:1px;
+             }
+</style>
+<title>waifu2x GUI</title>
+<meta http-equiv='content-type' content='text/html; charset=shift_jis'>
+<!-- 参考→http://mimizun.com/log/2ch/tech/1124559962/833 -->
+</head>
+<body onload="scaleautoChanging();modeselect01();noiselevelrange();folderable();compressdisable();windowresize();w2xautochange();" onresize="windowresize();">
+
+<h1>waifu2x GUI</h1>
+<form name="SettingForm" id="SettingForm">
+
+<!--
+
+　　雛形
+
+<fieldset>
+<legend> </legend>
+
+
+<lavel><input type=" " name=" " value=" " id=" " checked="checked"> </lavel>
+
+</fieldset>
+-->
+<div id="left_content">
+<fieldset>
+
+<legend>　使用するwaifu2x　</legend>
+<lavel><input type="checkbox" name="usewaifu_autoswitch" id="usewaifu_autoswitch" onchange="w2xautochange();">自動設定</lavel>
+
+<p>
+<lavel id="usewaifu_lavela"><input type="radio" name="usewaifu" value="waifu2x-converter" id="waifu2x-converter" checked="checked">waifu2x-converter-cpp</lavel>
+</p><p>
+<lavel id="usewaifu_lavelb"><input type="radio" name="usewaifu" value="waifu2x-caffe-cui" id="waifu2x-caffe-cui">waifu2x-caffe</lavel>
+</p>
+
+</fieldset>
+
+<fieldset name="F_scale_setting" id="F_scale_setting">
+<legend>拡大率</legend>
+<p>
+<lavel><input type="checkbox" name="scaleauto_check" value="checked" id="scaleauto_check" checked="checked" onclick="scaleautoChanging();">拡大率を自動計算</lavel>
+</p><table id="intofs">
+<tbody>
+<tr><th style="width:25%;">
+<lavel for="scaleauto_width">目標幅:</lavel></th><td id="td_into"><input type="number" value="1920" name="scaleauto_width" id="scaleauto_width" style="width:70px;">px
+</td></tr><tr><th>
+<lavel for="scaleauto_height">目標高さ:</lavel></th><td id="td_into"><input type="number" value="1080" name="scaleauto_height" id="scaleauto_height" style="width:70px;">px
+</td></tr><tr><td colspan="2">
+<hr>
+</td></tr><tr><th>
+<lavel for="scale_ratio01">拡大率:</lavel></th><td id="td_into"><input type="number" value="2.00" name="scale_ratio01" step="0.0000001" id="scale_ratio01"  style="width:70px;">倍
+</td></tr>
+</tbody>
+</table>
+</fieldset>
+
+
+<fieldset>
+<legend>変換する画像の拡張子</legend>
+<button type="button" onclick="allcheck(inexli01);" >全選択</button><button type="button" onclick="alldisable(inexli01);" >全解除</button>
+<table><tbody>
+<tr><td>
+<lavel><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked">jpg</lavel></td><td>
+<lavel><input type="checkbox" name="inexli01" value="jpeg" id="jpeg" checked="checked">jpeg</lavel>
+</td></tr>
+<tr><td>
+<lavel><input type="checkbox" name="inexli01" value="png" id="png" checked="checked">png</lavel></td><td>
+<lavel><input type="checkbox" name="inexli01" value="bmp" id="bmp" checked="checked">bmp</lavel>
+</td></tr>
+<tr><td>
+<lavel><input type="checkbox" name="inexli01" value="tif" id="tif" checked="checked">tif</lavel></td><td>
+<lavel><input type="checkbox" name="inexli01" value="tiff" id="tiff" checked="checked">tiff</lavel>
+</td></tr>
+<tr><td>
+<lavel><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked">tga</lavel></td><td>
+</td></tr>
+</tbody></table>
+</fieldset>
+
+<fieldset>
+<legend>終了時の処理</legend>
+
+<p><lavel><input type="checkbox" name="alarm_switch" id="alarm_switch" checked="checked" onchange="alarmchange();">終了時に音を鳴らす</lavel></p>
+<p><lavel><input type="file" name="alarmfile" id="alarmfile" accept="audio/wav"></lavel></p>
+
+<p><lavel><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</lavel></p>
+<p><lavel><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</lavel></p>
+
+</fieldset>
+
+
+</div>
+
+
+<div id="rightcontent">
+<fieldset>
+<legend>　動作モード　</legend>
+<p>
+<lavel><input type="radio" name="mode01" value="auto_scale" id="auto_scale" checked="checked" onchange="modeselect01();">jpeg以外でノイズ除去を行わない</lavel>
+</p><p>
+<lavel><input type="radio" name="mode01" value="noise_scale" id="noise_scale" onchange="modeselect01();">すべての画像に拡大とノイズ除去</lavel>
+</p><p>
+<lavel><input type="radio" name="mode01" value="scale" id="scale" onchange="modeselect04();">拡大のみ</lavel>
+</p><p>
+<lavel><input type="radio" name="mode01" value="noise" id="noise" onchange="modeselect03();">ノイズ除去のみ</lavel>
+</p>
+</fieldset>
+
+<fieldset>
+<legend>ノイズ除去レベル/モデル選択</legend>
+<div name="F_noise_setting" id="F_noise_setting"><lavel>Lv. <span id="noiselevelvalue"></span>
+<br><input type="range" name="noise_level01" id="noise_level01" max="3" min="1" onchange="noiselevelrange();" style="width:30%;height:14px;"></lavel></div>
+<p name="F_model_setting" id="F_model_setting">
+モデルを選択：<br>
+<select name="model01" id="model01" style="width:100%;">
+<option value="anime_style_art_rgb" selected>アニメ・イラスト[anime_style_art_rgb]</option>
+<option value="photo">写真[photo]</option>
+<option value="anime_style_art">アニメ・イラスト(輝度のみ)[anime_style_art]</option>
+</select>
+</p>
+</fieldset>
+
+<fieldset>
+<legend>フォルダ入力設定</legend>
+<p>
+<lavel><input type="checkbox" name="subf01" id="subf01" checked="checked">サブフォルダの画像も処理<br>(再帰的に処理する)</lavel>
+</p>
+</fieldset>
+
+<fieldset>
+<legend>フォルダ出力設定</legend>
+<p>
+<lavel><input type="radio" name="folderoutmode" value="0" id="0" onchange="folderdisable();compressdisable();">入力フォルダと同じフォルダ</lavel>
+</p><p>
+<lavel><input type="radio" name="folderoutmode" value="1" id="1" onchange="folderable();compressdisable();">フォルダに出力(分割する)</lavel>
+</p><p>
+<lavel><input type="radio" name="folderoutmode" value="2" id="2" onchange="folderable();compressdisable();" checked="checked">フォルダに出力(一括する)</lavel>
+</p><p>
+<lavel><input type="radio" name="folderoutmode" value="3" id="3" onchange="folderable();compressable();">圧縮フォルダに出力</lavel>
+</p>
+<table><tbody><tr><th>
+<lavel id="outfolder" for="outfoldernameset">出力フォルダ名：</lavel></th><td><input type="text" name="outfoldernameset" id="outfoldernameset" value="waifued" style="width:70px">
+</td></tr><tr><th>
+<lavel id="outzip" for="compformat">圧縮形式：</lavel></th><td><select name="compformat" id="compformat" style="width:70px">
+<option value="7z">7z</option>
+<option value="zip" selected>zip</option>
+<option value="xz">xz</option>
+<option value="bzip2">bzip2</option>
+<option value="gzip">gzip</option>
+<option value="tar">tar</option>
+<option value="wim">wim</option>
+</select>
+</td></tr></tbody></table>
+</fieldset>
+
+<div id="rightbottom">
+<p>参考:システム音のフォルダは C:\Windows\Media です。</p>
+</div>
+</div>
+
+<div style="clear:both;">
+<fieldset>
+<legend>付加オプション</legend>
+<p>その他のオプションです。(例 : --tta 1 )</p>
+<table><tbody>
+<tr><th><lavel for="otheropco01">converter-cpp:</lavel></th><td style="width:75%;"><input type="text" name="otheropco01" id="otheropco01" style="width:100%;"></td></tr>
+<tr><th><lavel for="otheropco01">caffe:</lavel></th><td style="width:75%;"><input type="text" name="otheropca01" id="otheropca01" style="width:100%;"></td></tr>
+<tr><th><lavel for="otheropco01">7-zip:</lavel></th><td style="width:75%;"><input type="text" name="otherop7z01" id="otherop7z01" style="width:100%;"></td></tr>
+</tbody></table>
+</fieldset>
+</div>
+</form>
+<object id="ddObj" classid='CLSID:8E3867A3-8586-11D1-B16A-00C0F0283628' style='height:100px;clear:both;width:100%;'>
+<param name='OLEDropMode' value='1'>
+<param name='Style' value='1'>
+<param name='Simpletext' value='Drop files here'>
+</object>
+
+<script type='text/JScript'><!--
+
+function windowresize(){
+var thewidth               = document.body.clientWidth;
+var leftcontent            = document.getElementById('left_content');
+var rightcontent           = document.getElementById('rightcontent');
+if ( thewidth >= 650 ){
+document.body.style.margin = "0% 10%";
+rightcontent.style.Float = "right";
+rightcontent.style.width = "49%";
+rightcontent.style.margin = "0px 0px 0px 1px";
+leftcontent.style.Float = "left";
+leftcontent.style.width = "49%";
+leftcontent.style.margin = "0px 1px 0px 0px";
+} else {
+document.body.style.margin = "0% 10%";
+rightcontent.style.Float = "none";
+rightcontent.style.Clear = "left";
+rightcontent.style.width = "100%";
+rightcontent.style.margin = "0px";
+leftcontent.style.Float = "none";
+leftcontent.style.Clear = "right";
+leftcontent.style.width = "100%" ;
+leftcontent.style.margin = "0px";
+}
+}
+var scaleauto_chkbox       = document.SettingForm.scaleauto_check;
+var scaleauto_height       = document.SettingForm.scaleauto_height;
+var scaleauto_width        = document.SettingForm.scaleauto_width;
+var scale_ratio01          = document.SettingForm.scale_ratio01;
+var noiselevelbar          = document.SettingForm.noise_level01
+
+function scaleautoChanging(){
+
+var scaleauto_chkbox       = document.SettingForm.scaleauto_check;
+
+if( scaleauto_chkbox.checked ){
+scaleauto_height.disabled  = false;
+scaleauto_width.disabled   = false;
+scale_ratio01.disabled     = true;
+} else {
+scaleauto_height.disabled  = true;
+scaleauto_width.disabled   = true;
+scale_ratio01.disabled     = false;
+}
+}
+
+function noiselevelrange(){
+
+var noise_level1to3        = document.SettingForm.noise_level01.value;
+
+if ( noise_level1to3 == 1 ){
+var noise_level01    = "1";
+} else if ( noise_level1to3 == 2 ){
+var noise_level01    = "2";
+} else if ( noise_level1to3 == 3 ){
+var noise_level01    = "super";
+}
+document.getElementById("noiselevelvalue").innerHTML = noise_level01;
+}
+
+function modeselect01(){
+
+scaleauto_chkbox.disabled  = false;
+scaleauto_height.disabled  = false;
+scaleauto_width.disabled  = false;
+scale_ratio01.disabled  = false;
+noiselevelbar.disabled  = false;
+scaleautoChanging();
+
+document.getElementById("F_scale_setting").style.color = "#000000";
+document.getElementById("F_noise_setting").style.color = "#000000";
+}
+function modeselect03(){
+
+scaleauto_chkbox.disabled  = true;
+scaleauto_height.disabled  = true;
+scaleauto_width.disabled  = true;
+scale_ratio01.disabled  = true;
+noiselevelbar.disabled  = false;
+
+document.getElementById("F_scale_setting").style.color = "#777777";
+document.getElementById("F_noise_setting").style.color = "#000000";
+}
+function modeselect04(){
+
+scaleauto_chkbox.disabled  = false;
+scaleauto_height.disabled  = false;
+scaleauto_width.disabled  = false;
+scale_ratio01.disabled  = false;
+noiselevelbar.disabled  = true;
+scaleautoChanging();
+
+document.getElementById("F_scale_setting").style.color = "#000000";
+document.getElementById("F_noise_setting").style.color = "#777777";
+}
+
+function allcheck(){
+for (i=0; i<document.SettingForm.inexli01.length; i++){
+    document.SettingForm.inexli01[i].checked = true;
+}
+}
+function alldisable(){
+for (i=0; i<document.SettingForm.inexli01.length; i++){
+    document.SettingForm.inexli01[i].checked = false;
+}
+}
+
+function compressable(){
+    document.getElementById("outzip").style.color = "#000000";
+    document.SettingForm.compformat.disabled = false;
+}
+function compressdisable(){
+    document.getElementById("outzip").style.color = "#777777";
+    document.SettingForm.compformat.disabled = true;
+}
+function folderable(){
+    document.getElementById("outfolder").style.color = "#000000";
+    document.SettingForm.outfoldernameset.disabled = false;
+}
+function folderdisable(){
+    document.getElementById("outfolder").style.color = "#777777";
+    document.SettingForm.outfoldernameset.disabled = true;
+}
+function alarmchange(){
+if ( document.SettingForm.alarm_switch.checked ){
+    document.SettingForm.alarmfile.disabled = false;
+} else {
+    document.SettingForm.alarmfile.disabled = true;
+}
+}
+
+function w2xautochange(){
+if ( document.SettingForm.usewaifu_autoswitch.checked ){
+    document.SettingForm.usewaifu[0].disabled = true;
+    document.SettingForm.usewaifu[1].disabled = true;
+    document.getElementById("usewaifu_lavela").style.color = "#777777";
+    document.getElementById("usewaifu_lavelb").style.color = "#777777";
+} else {
+    document.SettingForm.usewaifu[0].disabled = false;
+    document.SettingForm.usewaifu[1].disabled = false;
+    document.getElementById("usewaifu_lavela").style.color = "#000000";
+    document.getElementById("usewaifu_lavelb").style.color = "#000000";
+}
+}
+
+function ddObj::OLEDragDrop(Data,e){ 
+
+var form = document.SettingForm;
+var s = "\ ";
+
+if ( form.usewaifu_autoswitch.checked ){
+var usewaifu = "auto";
+} else if ( form.usewaifu[0].checked ){
+var usewaifu = "waifu2x-converter";
+} else if ( form.usewaifu[1].checked ){
+var usewaifu = "waifu2x-caffe-cui";
+}
+
+if ( form.scaleauto_check.checked ){
+var scaleauto = "true";
+var scaleauto_width01 = form.scaleauto_width.value;
+var scaleauto_height01 = form.scaleauto_height.value;
+var scale_ratio01 = form.scale_ratio01.value;
+} else {
+var scaleauto = "false";
+var scaleauto_width01 = "none";
+var scaleauto_height01 = "none";
+var scale_ratio01 = form.scale_ratio01.value;
+}
+
+if ( form.mode01[0].checked ){
+var mode01 = "auto_scale";
+} else if ( form.mode01[1].checked ){
+var mode01 = "noise_scale";
+} else if ( form.mode01[2].checked ){
+var mode01 = "scale";
+} else if ( form.mode01[3].checked ){
+var mode01 = "noise";
+}
+
+noiselevelrange();
+
+var model01 = form.model01.value;
+var inexli01m = ;
+for ( i=0; i < form.inexli01.length; i++ ){
+if ( form.inexli01[i].checked ){
+var inexli01m = inexli01m + form.inexli01[i].value + "\:";
+}
+}
+
+if ( inexli01m = void(0) ){
+var inexli01m = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:";
+}
+
+var inexli01 = inexli01m.substr( 0 , inexli01m.length - 1 );
+
+var subf01 = form.subf01.checked;
+
+var i = 0;
+do {
+var folderoutmodetf = form.folderoutmode[i].checked;
+i++;
+} while( folderoutmodetf = "false" );
+i--;
+var folderoutmode = form.folderoutmode[i].value;
+
+var outfoldernameset = form.outfoldernameset.value;
+var compformat = form.compformat.value;
+
+var twittermode = form.twittermode.checked;
+
+var alphaswitch = form.alphaswitch.checked;
+
+if ( form.alarm_switch ){
+if ( form.alarmfile.value = void 0 ){
+var endwav = "none";
+} else {
+var endwav = '\"' + form.alarmfile.value + '\"';
+}
+} else {
+var endwav = "none";
+}
+alert( mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01
+                                 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset
+                                                               + s + compformat + s + endwav);
+
+}
+
+function kari(){
+/*
+ mode01    + model01       + scaleauto + scaleauto_width01 + scaleauto_height01 + scale_ratio01
+                                   + noise_level01 + inexli01 + subf01 + usewaifu + folderoutmode + outfoldernameset
+                                                                   + compformat + endwav                    + alphaswitch + otheropca01 + otheropco01 + otherop7z01
+auto_scale anime_style_art_rgb false none none 2 super default true auto 2 7z "C:\Windows\Media\Ring03.wav" false true none none none
+*/
+
+// 参考→ http://sei.qee.jp/docs/program/hta/location/href.html
+
+var semicoron   = '\"';
+var space       = "\ ";
+var myCD        = new ActiveXObject("Scripting.FileSystemObject").GetFolder(".").Path;
+var myBat       = myCD + "\\script\\waifu2x-front_end.bat";
+var theTMP      = new ActiveXObject( "WScript.Shell" ).ExpandEnvironmentStrings("%TMP%");
+var outsetting  = theTMP + "\\w2xgui_outsetting.txt";
+alert(myBat);
+
+//Data.Files.;DDしたファイルの数 
+//Data.Files.Item(n);n＝1～でDDしたファイルのフルパス 
+var n = 2;
+var TheFiles = '"' + Data.Files.Item(1) + '"';
+var e = true;
+try{
+while( e = "true" ){
+ var TheFiles = TheFiles + ' "' + Data.Files.Item(n) + '"';
+ n ++;
+}
+}catch(e){
+var wsh = new ActiveXObject( "WScript.Shell" );
+wsh.Run( semicoron + myBat + semicoron + space + semicoron + outsetting + semicoron + space + TheFiles );
+wsh = null;
+}
+}
+--></script>
+
+</body></html>
