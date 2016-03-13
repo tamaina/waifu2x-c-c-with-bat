@@ -222,6 +222,7 @@ p            {
 </tbody></table>
 </fieldset>
 </div>
+
 </form>
 <object id="ddObj" classid='CLSID:8E3867A3-8586-11D1-B16A-00C0F0283628' style='height:100px;clear:both;width:100%;'>
 <param name='OLEDropMode' value='1'>
@@ -276,17 +277,19 @@ scale_ratio01.disabled     = false;
 }
 }
 
-function noiselevelrange(){
-
+function noiselevelhoge(){
 var noise_level1to3        = document.SettingForm.noise_level01.value;
-
 if ( noise_level1to3 == 1 ){
-var noise_level01    = "1";
+return "1";
 } else if ( noise_level1to3 == 2 ){
-var noise_level01    = "2";
+return "2";
 } else if ( noise_level1to3 == 3 ){
-var noise_level01    = "super";
+return "super";
 }
+}
+
+function noiselevelrange(){
+var noise_level01 = noiselevelhoge();
 document.getElementById("noiselevelvalue").innerHTML = noise_level01;
 }
 
@@ -409,42 +412,48 @@ var mode01 = "scale";
 } else if ( form.mode01[3].checked ){
 var mode01 = "noise";
 }
-
-noiselevelrange();
-
 var model01 = form.model01.value;
-var inexli01m = ;
+var inexlim;
 for ( i=0; i < form.inexli01.length; i++ ){
 if ( form.inexli01[i].checked ){
-var inexli01m = inexli01m + form.inexli01[i].value + "\:";
+if ( inexlim == void 0 ){
+var inexlim = form.inexli01[i].value + "\:";
+} else {
+var inexlim = inexlim + form.inexli01[i].value + "\:";
 }
 }
-
-if ( inexli01m = void(0) ){
-var inexli01m = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:";
 }
-
-var inexli01 = inexli01m.substr( 0 , inexli01m.length - 1 );
-
+if ( inexlim == void 0 ){
+var inexlim = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:";
+}
+var inexli01 = inexlim.substr( 0 , inexlim.length - 1 );
 var subf01 = form.subf01.checked;
 
 var i = 0;
 do {
 var folderoutmodetf = form.folderoutmode[i].checked;
-i++;
-} while( folderoutmodetf = "false" );
-i--;
 var folderoutmode = form.folderoutmode[i].value;
-
+i++;
+} while( folderoutmodetf == false );
 var outfoldernameset = form.outfoldernameset.value;
 var compformat = form.compformat.value;
-
 var twittermode = form.twittermode.checked;
-
 var alphaswitch = form.alphaswitch.checked;
-
-if ( form.alarm_switch ){
-if ( form.alarmfile.value = void 0 ){
+var otheropca01 = form.otheropca01.value;
+var otheropco01 = form.otheropco01.value;
+var otherop7z01 = form.otherop7z01.value;
+if ( otheropca01 == "" ){
+var otheropca01 = "none";
+}
+if ( otheropco01 == "" ){
+var otheropco01 = "none";
+}
+if ( otherop7z01 == "" ){
+var otherop7z01 = "none";
+}
+var noise_level01 = noiselevelhoge();
+if ( form.alarm_switch.checked ){
+if ( form.alarmfile.value == "" ){
 var endwav = "none";
 } else {
 var endwav = '\"' + form.alarmfile.value + '\"';
@@ -452,19 +461,8 @@ var endwav = '\"' + form.alarmfile.value + '\"';
 } else {
 var endwav = "none";
 }
-alert( mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01
-                                 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset
-                                                               + s + compformat + s + endwav);
+var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + otheropca01 + s + otheropco01 + s + otherop7z01;
 
-}
-
-function kari(){
-/*
- mode01    + model01       + scaleauto + scaleauto_width01 + scaleauto_height01 + scale_ratio01
-                                   + noise_level01 + inexli01 + subf01 + usewaifu + folderoutmode + outfoldernameset
-                                                                   + compformat + endwav                    + alphaswitch + otheropca01 + otheropco01 + otherop7z01
-auto_scale anime_style_art_rgb false none none 2 super default true auto 2 7z "C:\Windows\Media\Ring03.wav" false true none none none
-*/
 
 // 参考→ http://sei.qee.jp/docs/program/hta/location/href.html
 
@@ -472,9 +470,13 @@ var semicoron   = '\"';
 var space       = "\ ";
 var myCD        = new ActiveXObject("Scripting.FileSystemObject").GetFolder(".").Path;
 var myBat       = myCD + "\\script\\waifu2x-front_end.bat";
-var theTMP      = new ActiveXObject( "WScript.Shell" ).ExpandEnvironmentStrings("%TMP%");
-var outsetting  = theTMP + "\\w2xgui_outsetting.txt";
-alert(myBat);
+var outsetting  = myCD + "\\script\\setting.ini";
+//alert(myBat);
+
+var fs = new ActiveXObject( "Scripting.FileSystemObject" );
+var f = fs.OpenTextFile( outsetting , 2 , true );
+f.WriteLine( out );
+f.Close();
 
 //Data.Files.;DDしたファイルの数 
 //Data.Files.Item(n);n＝1～でDDしたファイルのフルパス 
@@ -491,6 +493,18 @@ var wsh = new ActiveXObject( "WScript.Shell" );
 wsh.Run( semicoron + myBat + semicoron + space + semicoron + outsetting + semicoron + space + TheFiles );
 wsh = null;
 }
+
+}
+function firstread(){
+var s           = "\ ";
+var fs          = new ActiveXObject( "Scripting.FileSystemObject" );
+var myCD        = fs.GetFolder(".").Path;
+var outsetting  = myCD + "\\script\\setting.ini";
+
+var file        = fs.OpenTextFile( '\"' + outsetting + '\"', 1, false, -2 );
+var text        = file.ReadAll();
+alert( text );
+
 }
 --></script>
 

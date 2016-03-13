@@ -602,7 +602,7 @@ type NUL > "%multset_txt%
 if !scale_ratio01! LEQ 1 (
 echo !DATE! !TIME! 計算完了 : 拡大しません。
 ) else (
-echo !DATE! !TIME! 計算完了 : %scale_ratio01%倍に拡大し、そこから縮小します。
+echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 )
 )
 set /P imagewidth= < "%width_txt%"

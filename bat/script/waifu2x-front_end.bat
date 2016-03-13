@@ -38,62 +38,87 @@ type NUL > "%height_txt%"
 for /F "usebackq tokens=1-18" %%a in ( "%~1" ) do (
 set mode01=%%a
 rem auto_scale
+echo mode01 !mode01!
 
 set model01=%%b
+echo model01 !model01!
 rem anime_style_art_rgb
 
 set scaleauto=%%c
+echo scaleauto !scaleauto!
 rem false
 
 set scaleauto_width01=%%d
 rem 1920
 if "!scaleauto_width01!" == "none" set scaleauto_width01=
+echo scaleauto_width01 !scaleauto_width01!
 
 set scaleauto_height01=%%e
 rem 1080
 if "!scaleauto_height01!" == "none" set scaleauto_height01=
+echo scaleauto_height01 !scaleauto_height01!
 
 set scale_ratio01=%%f
+echo scale_ratio01 !scale_ratio01!
 rem 2
 
 set noise_level01=%%g
+echo noise_level01 !noise_level01!
 rem 2
 
 set inexli01=%%h
 if "!inexli01!" == "default" set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
 rem png:jpg:jpeg:tif:tiff:bmp:tga
+echo inexli01 !inexli01!
 
 set subf01=%%i
 rem true
+echo subf01 !subf01!
 
 set usewaifu=%%j
 rem waifu2x-converter
 if "!usewaifu!" == "none" set usewaifu=
 if "!usewaifu!" == "auto" set usewaifu=
+echo usewaifu  !usewaifu!
 
 set folderoutmode=%%k
 rem 2
+echo folderoutmode !folderoutmode!
 
-set compformat=%%l
+set outfoldernameset=%%l
+rem waifued
+echo outfoldernameset !outfoldernameset!
+
+set compformat=%%m
 rem 7z
+echo compfotmat !compformat!
 
-set endwav=%%m
+set endwav=%%n
 rem "C:\Windows\Media\Ring03.wav"
 if "!endwav!" == "none" set endwav=
+echo endwav !endwav!
 
-set twittermode=%%n
+set twittermode=%%o
 rem false
+echo twittermode !twittermode!
 
-set alphaswitch=%%o
+set alphaswitch=%%p
 rem true
+echo alphaswitch !alphaswitch!
 
-set otheropca01=%%p
-set otheropco01=%%q
-set otherop7z01=%%r
+set otheropca01=%%q
+set otheropco01=%%r
+set otherop7z01=
+if "!otheropca01!" == "none" (
+ set otheropca01=
+)
+if "!otheropco01!" == "none" (
+ set otheropco01=
+)
 
-if "!otheropca01!" == "none" set otheropca01=
-if "!otheropco01!" == "none" set otheropco01=
-if "!otherop7z01!" == "none" set otherop7z01=
+echo otheropca01 !otheropca01!
+echo otheropco01 !otheropco01!
+echo otherop7z01 !otherop7z01!
 
 )
 shift
@@ -379,14 +404,14 @@ if "%scaleauto%" == "true" (
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
 )
-CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" "%width_txt%" "%height_txt%" > NUL 2>&1
+CScript "%batdp%\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" "%width_txt%" "%height_txt%" >> "%logname%.log" 2>>&1
 if "%scaleauto%" == "true" (
 set /P scale_ratio01= < "%multset_txt%"
 type NUL > "%multset_txt%
 if !scale_ratio01! LEQ 1 (
 echo !DATE! !TIME! 計算完了 : 拡大しません。
 ) else (
-echo !DATE! !TIME! 計算完了 : %scale_ratio01%倍に拡大し、そこから縮小します。
+echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 )
 )
 set /P imagewidth= < "%width_txt%"
