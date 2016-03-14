@@ -4,6 +4,9 @@ cd /d "%~dp0"
 cd ..
 echo .
 echo !DATE! !TIME! twittermode.bat
+:loop
+
+if "%~1" == "" goto end
 set dott_png=%TMP%\dott.png
 set twitter_png=%~dp1\forTwitter_%~n1.png
 set colorqual=256
@@ -34,7 +37,8 @@ del "%dott_png%"
 echo !DATE! !TIME! twitter用画像が完成しました。
 echo ファイル名:"%twitter_png%"
 echo .
-goto end
+shift
+goto loop
 :filesize
 set thesize=%~z1
 goto end
