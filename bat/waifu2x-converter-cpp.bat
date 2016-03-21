@@ -70,9 +70,12 @@ set scaleauto_height01=1080
 :************************************************************
 :【④】手動倍率設定[--scale_ratio]
 
-set scale_ratio01=2
+set scale_ratio01=3
 
 : 自動倍率計算が無効のときに使います。waifu2xのデフォルトです。
+: ただし、2のwaifu2xでニの二乗倍で拡大し、それからimagemagickで
+: 縮小します。
+
 : 数字(単位:倍)小数点可。
 :=============================================================
 :
@@ -119,7 +122,7 @@ set subf01=true
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-converter
+set usewaifu=waifu2x-caffe-cui
 
 :使用するwaifu2xを選択します。
 :
@@ -219,7 +222,7 @@ set alphaswitch=true
 :その他オプション(上級者用設定)
 :
 :          ↓ca(上)がcaffe co(中)がconverter-cpp
-set otheropca01=
+set otheropca01=--tta 1
 set otheropco01=
 set otherop7z01=
 :          ↑7z(下)が7-zip
@@ -288,9 +291,11 @@ set otherop7z01=
 
 :===========================================================================================================================================
 :準備
+echo %1
 if "%~1" == "" exit
 Title %~nx0 : waifu2x now denoising!
 setlocal enabledelayedexpansion
+set scale_ratio02=%scale_ratio01%
 pushd "%~dp0"
 pushd ..
 Path=%PATH%;%CD%
@@ -303,20 +308,20 @@ set out_ext01=png
 set thebat="%~0"
 set batdp=%~dp0
 set batnx=%~nx0
+set batnm=%~n0
 
 set firstprocess=true
 set process01=gpu
-set hoge=*.%inexli01::= *.%
 
-set multset_txt=%TMP%\mset-%~n0.txt
-set fname_txt=%TMP%\fset-%~n0.txt
-set width_txt=%TMP%\widthset-%~n0.txt
-set height_txt=%TMP%\heightset-%~n0.txt
+
+set multset_txt=%TMP%\mset-%batnm%.txt
+set fname_txt=%TMP%\fset-%batnm%.txt
 
 type NUL > "%multset_txt%"
 type NUL > "%fname_txt%"
-type NUL > "%width_txt%"
-type NUL > "%height_txt%"
+
+:start
+set hoge=*.%inexli01::= *.%
 
 pushd "%~1" > NUL 2>&1
 set pushderrorlv=%ErrorLevel%
@@ -334,8 +339,8 @@ if "%folderoutmode%" == "2" (
 set outfoldercd=%~dp1\%outfoldernameset%
 set outfolder=%~dp1\%outfoldernameset%
 ) else if "%folderoutmode%" == "3" (
-set outfoldercd=%TMP%\%~n0\%outfoldernameset%
-set outfolder=%TMP%\%~n0\%outfoldernameset%
+set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
+set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1\%outfoldernameset%.%compformat%
 ) else (
 set outfolder=%~dp1\%outfoldernameset%
@@ -343,7 +348,7 @@ set outfolder=%~dp1\%outfoldernameset%
 
 mkdir "!outfolder!" > NUL 2>&1
 set logname=!outfolder!\w2xresult
-echo %DATE% %TIME% Run %~nx0 >>"%logname%.log" 2>>&1
+echo %DATE% %TIME% Run %batnx% >>"%logname%.log" 2>>&1
 echo 出力フォルダ:"!outfolder!"
 echo ログ:"%logname%.log"
 goto next1
@@ -354,8 +359,8 @@ if "%folderoutmode%" == "2" (
 set outfoldercd=%~dp1%outfoldernameset%
 set outfolder=%~dp1%outfoldernameset%
 ) else if "%folderoutmode%" == "3" (
-set outfoldercd=%TMP%\%~n0\%outfoldernameset%
-set outfolder=%TMP%\%~n0\%outfoldernameset%
+set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
+set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1%outfoldernameset%.%compformat%
 ) else (
 set outfolder=%~dp1%outfoldernameset%
@@ -408,27 +413,26 @@ if errorlevel 2 (
 
 :モード設定-使用waifu
 if "%usewaifu%" == "" (
-  if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
-  
+ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
  set usewaifu=waifu2x-caffe-cui
  set autochoosecc=step1
  echo %DATE% %TIME% 64bitCPUを検出しました。はじめにwaifu2x-caffeで処理します。
  echo %DATE% %TIME% 64bitCPUを検出しました。はじめにwaifu2x-caffeで処理します。 >>"%logname%.log" 2>>&1
  goto shiwake
-  ) else (
+ ) else (
  set usewaifu=waifu2x-converter
  echo %DATE% %TIME% 32bitCPUを検出しました。32bit版waifu2x-converterで処理します。
  echo %DATE% %TIME% 32bitCPUを検出しました。32bit版waifu2x-converterで処理します。 >>"%logname%.log" 2>>&1
  goto shiwake
-  )
- ) else if "%usewaifu%" == "waifu2x-converter" (
+ )
+) else if "%usewaifu%" == "waifu2x-converter" (
    if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
    set usewaifu=waifu2x-converter_x64
    )
   goto shiwake
- ) else (
+) else (
  goto shiwake
- )
+)
 
 
 
@@ -438,8 +442,8 @@ pushd "%~1" > NUL 2>&1
 if errorlevel 1 (
  set folder=false
  if "%~x1" == "" (
- echo Error！！！ >>"%logname%.log" 2>>&1
- echo Error！！！
+ echo Error！！！ 0x10 >>"%logname%.log" 2>>&1
+ echo Error！！！ 0x10
  echo いずれかのファイルの名前に処理できない文字が含まれているようです。^;や^,がないか確認してください。 >>"%logname%.log" 2>>&1
  echo いずれかのファイルの名前に処理できない文字が含まれているようです。^;や^,がないか確認してください。
  goto Finish_w2x
@@ -489,7 +493,7 @@ goto end
 
 :success
 
-if "%scaleauto%" == "true" (
+if not "%scale_ratio01%" == "%scale_ratio02%" (
  echo !DATE! !TIME! 設定した大きさに縮小します。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 設定した大きさに縮小します。 
  call :reduction "%~1"
@@ -567,7 +571,11 @@ if /I "%~x1" == ".jpg" (
 )
 :nam_a
 set scaling=true
-set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio01!x!exte!
+if "%scaleauto%" == "true" (
+set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+) else (
+set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x!exte!
+)
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
 
@@ -581,7 +589,11 @@ goto EONam
 :nam_c
 
 set scaling=true
-set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio01!x!exte!
+if "%scaleauto%" == "true" (
+set mode01nam=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+) else (
+set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x!exte!
+)
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
 
@@ -595,20 +607,28 @@ if "%scaleauto%" == "true" (
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
 )
-CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" "%width_txt%" "%height_txt%" > NUL 2>&1
-if "%scaleauto%" == "true" (
+for /f %%x in ( 'identify -format ^"%%w^" %1' ) do (
+set imagewidth=%%x
+)
+for /f %%y in ( 'identify -format ^"%%h^" %1' ) do (
+set imageheight=%%y
+)
+CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" !imageheight! !imagewidth! %scaleauto% %scale_ratio02% > NUL 2>&1
+
 set /P scale_ratio01= < "%multset_txt%"
 type NUL > "%multset_txt%
+if "%scaleauto%" == "true" (
 if !scale_ratio01! LEQ 1 (
 echo !DATE! !TIME! 計算完了 : 拡大しません。
 ) else (
 echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 )
 )
-set /P imagewidth= < "%width_txt%"
-set /P imageheight= < "%height_txt%"
-type NUL > "%width_txt%"
-type NUL > "%height_txt%"
+
+if "%scaleauto%" == "false" (
+set /A "scaleauto_width01 = imagewidth * scale_ratio02"
+set /A "scaleauto_height01 = imageheight * scale_ratio02"
+)
 
 goto end
 
@@ -702,12 +722,11 @@ goto end
 :===========================================================================================================================================
 
 :command_w2x
-
 if "!usewaifu:converter=!" NEQ "!usewaifu!" (
 !usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "!outfolder!\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
-!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "!outfolder!\!mode01nam!" -l %inexli01% -e %ex:~1% %otheropca01% >>"%logname%.log" 2>>&1
+!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "!outfolder!\!mode01nam!" -l %inexli01% -e png %otheropca01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else (
 echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
@@ -724,13 +743,13 @@ if "!w2xERROR!" GEQ "1" (
   set autochoosecc=step2
   echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。 >>"%logname%.log" 2>>&1
   echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。converterに移しその他のハードでの変換を開始します。
-  goto dow2x
+  goto command_w2x
  ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
   if "!process01!" == "gpu" (
   set process01=cpu
   echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。 >>"%logname%.log" 2>>&1
   echo !DATE! !TIME! caffeでGPUでの変換を試みましたが、できませんでした。cpuで変換します。
-  goto dow2x
+  goto command_w2x
   ) else (
   echo Error！！！ 0x01 >>"%logname%.log" 2>>&1
   echo Error！！！ 0x01
@@ -785,6 +804,9 @@ if "%allis%" == "okay" exit /b
 
 call :command_w2x "%~1"
 
+if "%AddICC%" == "true" (
+
+)
  call wtb.bat STOP
  echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
@@ -814,8 +836,9 @@ goto end
 :===========================================================================================================================================
 
 :w2x_file
+pushd %batdp%
+pushd ..
 call wtb.bat START
-
 :inexli01にあってるか確認する
 setlocal
 set ex=%~x1
@@ -852,7 +875,7 @@ call :dow2x "%~1"
 :===========================================================================================================================================
 :w2x_folder
 
-pushd "%~1"
+pushd %1
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
 if "%subf01%" == "true" (
  rem サブフォルダ処理モード
@@ -866,6 +889,8 @@ goto shiwake
  
 :w2xf1
 popd
+pushd %batdp%
+pushd ..
 call wtb.bat START
 set cafname=%~n1
 if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>"%logname%.log" 2>>&1
@@ -930,8 +955,6 @@ echo. >>"%logname%.log" 2>&1
 
 Del "%multset_txt%"
 Del "%fname_txt%"
-Del "%width_txt%"
-Del "%height_txt%"
 
 set AUDIODRIVER=waveaudio
 if not "%endwav%" == "" (
