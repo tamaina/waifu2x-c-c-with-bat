@@ -70,7 +70,7 @@ set scaleauto_height01=1080
 :************************************************************
 :【④】手動倍率設定[--scale_ratio]
 
-set scale_ratio01=3
+set scale_ratio01=2
 
 : 自動倍率計算が無効のときに使います。waifu2xのデフォルトです。
 : ただし、2のwaifu2xでニの二乗倍で拡大し、それからimagemagickで
@@ -101,12 +101,12 @@ set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
 :
 :出力拡張子[-e --output_extention]
 :
-:              png
 :
-:pngのみ対応します。
-:
-:png以外はサポート対象外です。
-:
+
+set OutputExtension=png
+
+:いったんpngに変換されます。
+:拡張子の前の.(ドット)は必要ありません。
 :=============================================================
 :
 :フォルダを処理するときサブフォルダも処理する[bat独自]
@@ -122,7 +122,7 @@ set subf01=true
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-caffe-cui
+set usewaifu=waifu2x-converter
 
 :使用するwaifu2xを選択します。
 :
@@ -179,10 +179,10 @@ set compformat=7z
 :BEEP
 :
 
-set endwav="C:\Windows\Media\Ring03.wav"
+set endwav=C:\Windows\Media\Ring03.wav
 
 :終了時に音を鳴らします。要らない場合は空にしてください。
-:"～"で囲った形でフルパスで指定してください。
+:"～"で囲わずに、フルパスで指定してください。
 :形式について：Soxを使っていますが、wavでしか試していません。
 :=============================================================
 :
@@ -197,7 +197,7 @@ set twittermode=false
 :有効にするにはImageMagickが必要です。
 :trueにすると以下のことを実行します。
 : ① jpegにならないように、左上を少しだけ透過します。
-: ② pngquantでファイルサイズを5MB以下に圧縮します。
+: ② pngquantでファイルサイズを3MB以下に圧縮します。
 :
 :Twittermode処理完了後の画像はファイル名の先頭にfortwitter_が
 :付きます。
@@ -216,6 +216,20 @@ set alphaswitch=true
 :
 :きれいになる画像もあれば、汚くなる画像もあるため、画像との相性に
 :注意して使い分けてください。
+:=============================================================
+:
+:iccプロファイルを付与
+:Add ICC Profile
+:
+
+set IccProf=
+
+:拡張子iccのファイルをフルパスで"～"で囲わず指定してください。
+:(例)
+: set IccProf=C:\Windows\System32\spool\drivers\color\AdobeRGB1998.icc
+:
+:バッチファイル内一律設定です。画像ごとの指定はできません。
+:無効にする場合は空欄にします。
 :=============================================================
 :
 :
@@ -291,7 +305,6 @@ set otherop7z01=
 
 :===========================================================================================================================================
 :準備
-echo %1
 if "%~1" == "" exit
 Title %~nx0 : waifu2x now denoising!
 setlocal enabledelayedexpansion
@@ -321,6 +334,9 @@ type NUL > "%multset_txt%"
 type NUL > "%fname_txt%"
 
 :start
+if "%OutputExtension%" == "" (
+set OutputExtension=png
+)
 set hoge=*.%inexli01::= *.%
 
 pushd "%~1" > NUL 2>&1
@@ -504,14 +520,6 @@ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
 
-if "%twittermode%" == "true" (
- echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
- echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
- call %batdp%\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
- echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
- echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
- echo 生成画像名:forTwitter_!mode01nam!
-)
 
 goto end
 
@@ -546,6 +554,7 @@ if /I "%~x1" == ".jpg" (
  ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
+ set mode01namwoex=%~n1_reduced
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -559,6 +568,7 @@ if /I "%~x1" == ".jpg" (
 ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
+ set mode01namwoex=%~n1_reduced
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -573,8 +583,10 @@ if /I "%~x1" == ".jpg" (
 set scaling=true
 if "%scaleauto%" == "true" (
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+set mode01namwoex=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%
 ) else (
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x!exte!
+set mode01namwoex=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x
 )
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
@@ -583,6 +595,7 @@ goto EONam
 
 set scaling=false
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
+set mode01namwoex=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%
 set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
@@ -591,8 +604,10 @@ goto EONam
 set scaling=true
 if "%scaleauto%" == "true" (
 set mode01nam=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+set mode01namwoex=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%
 ) else (
 set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x!exte!
+set mode01namwoex=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x
 )
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
@@ -804,9 +819,6 @@ if "%allis%" == "okay" exit /b
 
 call :command_w2x "%~1"
 
-if "%AddICC%" == "true" (
-
-)
  call wtb.bat STOP
  echo . >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
@@ -835,11 +847,47 @@ goto end
 
 :===========================================================================================================================================
 
+:LongFilePath
+for /f "delims=" %%p in ( 'call %batdp%\longname.bat "%~1"' ) do (
+set FileName=%%p
+)
+
+set FilePath=%~dp1!FileName!
+
+goto end
+:===========================================================================================================================================
+
+:shimatsu
+if not "%OutputExtension%" == "png" (
+convert "!outfolder!\!mode01nam!" "!outfolder!\!mode01namwoex!.%OutputExtension%"
+del "!outfolder!\!mode01nam!"
+if not "%IccProf%" == "" (
+convert "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!outfolder!\!mode01namwoex!.%OutputExtension%" >>"%logname%.log" 2>>&1
+)
+
+) else (
+if not "%IccProf%" == "" (
+convert "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+)
+)
+
+if "%twittermode%" == "true" (
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
+ call %batdp%\twittermode.bat "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
+ echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
+ echo 生成画像名:forTwitter_!mode01nam!
+)
+goto end
+:===========================================================================================================================================
+
 :w2x_file
 pushd %batdp%
 pushd ..
 call wtb.bat START
 :inexli01にあってるか確認する
+call :LongFilePath "%~1"
 setlocal
 set ex=%~x1
 set n=0
@@ -848,40 +896,48 @@ if /I "%ex%" == ".%%a" set excheckr=true
 )
 
 if "!excheckr!" == "true" (
- endlocal
+endlocal
  goto okayex
  ) else (
-endlocal
-
- echo "%~nx1"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。 >>"%logname%.log" 2>>&1
- echo "%~nx1"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。
+ endlocal
+ echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。 >>"%logname%.log" 2>>&1
+ echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。
  goto nextforex
  )
 :okayex
-
 if "%folderoutmode%" == "2" (
 call :outfilename_a "%~1"
 ) else if "%folderoutmode%" == "3" (
 call :outfilename_a "%~1"
 )
 
-call :dow2x "%~1"
+call :dow2x "!FilePath!"
 
+call :shimatsu
 :nextforex
  shift
  if "%~1" == "" goto Finish_w2x
  goto shiwake
- 
+
+:===========================================================================================================================================
+
 :===========================================================================================================================================
 :w2x_folder
 
 pushd %1
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
+set folderpath=%~1
 if "%subf01%" == "true" (
  rem サブフォルダ処理モード
- for /R %%t in (%hoge%) do call :w2xf1 "%%~t" true "%~1"
+ for /f "delims=" %%t in ( 'dir %hoge% /A /B /S' ) do (
+  set filepath=%%~st
+  call :w2xf1 !filepath! true "%folderpath%"
+  )
  ) else (
- for %%t in (%hoge%) do call :w2xf1 "%~1\%%~t"
+ for /f "delims=" %%t in ( 'dir %hoge% /A /B' ) do (
+  set filepath=%~s1\%%~snxt
+  call :w2xf1 !filepath!
+  )
  )
 shift
 if "%~1" == "" goto Finish_w2x
@@ -892,7 +948,10 @@ popd
 pushd %batdp%
 pushd ..
 call wtb.bat START
-set cafname=%~n1
+
+call :LongFilePath %1
+
+set cafname=!FileName!
 if not "!cafname:waifu2x=hoge!" == "!cafname!" exit /b >>"%logname%.log" 2>>&1
 
 if "%folderoutmode%" == "2" (
@@ -909,7 +968,9 @@ call :outfilename_a "%~1"
 )
 )
 
-call :dow2x "%~1"
+call :dow2x "!FilePath!"
+
+call :shimatsu
 
 goto end
 :===========================================================================================================================================
@@ -958,7 +1019,7 @@ Del "%fname_txt%"
 
 set AUDIODRIVER=waveaudio
 if not "%endwav%" == "" (
-play %endwav%
+play "%endwav%"
 )
 
 pause

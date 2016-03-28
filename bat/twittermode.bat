@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 cd ..
-echo .
+echo.
 echo !DATE! !TIME! twittermode.bat
 :loop
 
@@ -36,7 +36,7 @@ goto return
 del "%dott_png%"
 echo !DATE! !TIME! twitter用画像が完成しました。
 echo ファイル名:"%twitter_png%"
-echo .
+echo.
 shift
 goto loop
 :filesize
