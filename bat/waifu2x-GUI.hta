@@ -174,7 +174,7 @@ window.moveTo( splited[23],splited[24] );
 <!-- ŽQl¨http://mimizun.com/log/2ch/tech/1124559962/833 -->
 </head>
 
-<body onload="firstread();FoldermodeChanging();scaleautoChanging();modeselect01();noiselevelrange();folderable();compressdisable();windowresize();w2xautochange();alarmchange();iccchange();" onresize="windowresize();" onBeforeUnload="SettingOutput();">
+<body>
 
 
 <h1>waifu2x GUI</h1>
@@ -429,6 +429,7 @@ legends[i].style.width = setwidth + "px" ;
 }
 
 }
+
 var scaleauto_chkbox       = document.SettingForm.scaleauto_check;
 var scaleauto_height       = document.SettingForm.scaleauto_height;
 var scaleauto_width        = document.SettingForm.scaleauto_width;
@@ -508,6 +509,17 @@ scaleautoChanging();
 document.getElementById("F_noise_setting").style.color = "#8899a6";
 }
 
+function modeselect(){
+if ( form.mode01[0].checked ){
+modeselect01();
+} else if ( form.mode01[1].checked ){
+modeselect01();
+} else if ( form.mode01[2].checked ){
+modeselect04();
+} else if ( form.mode01[3].checked ){
+modeselect03();
+}
+}
 function allcheck(){
 for (i=0; i<document.SettingForm.inexli01.length; i++){
     document.SettingForm.inexli01[i].checked = true;
@@ -753,6 +765,26 @@ var execcommand = sysFolder + '\\cmd.exe \/C start ' + myBatShort + s + outsetSh
 wsh.Exec( execcommand );
 }
 }
+window.onload = function() {
+firstread();
+FoldermodeChanging();
+scaleautoChanging();
+modeselect();
+noiselevelrange();
+folderable();
+compressdisable();
+w2xautochange();
+alarmchange();
+iccchange();
+windowresize();
+}
+window.onresize = function(){
+windowresize();
+}
+window.onbeforeunload = function(){
+SettingOutput();
+}
+
 --></script>
 
 </body>
