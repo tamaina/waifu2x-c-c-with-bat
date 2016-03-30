@@ -720,6 +720,31 @@ f.WriteLine( out );
 f.Close();
 
 }
+
+
+
+window.onload = function() {
+firstread();
+FoldermodeChanging();
+scaleautoChanging();
+modeselect();
+noiselevelrange();
+folderable();
+compressdisable();
+w2xautochange();
+alarmchange();
+iccchange();
+windowresize();
+}
+window.onresize = function(){
+windowresize();
+}
+window.onbeforeunload = function(){
+SettingOutput();
+}
+
+
+
 function ddObj::OLEDragDrop(Data,e){ 
 
 var s = "\ ";
@@ -741,48 +766,30 @@ var sysFolder   = fs.GetFolder( "C:\\Windows\\System32" );
 //Data.Files.;DDしたファイルの数 
 //Data.Files.Item(n);n＝1～でDDしたファイルのフルパス 
 try{
-var File  = '"' + fs.GetFile( Data.Files.Item(1) ).ShortPath + '"';
+var FileS  = '"' + fs.GetFile( Data.Files.Item(1) ).ShortPath + '"';
 }catch(e){
-var File  = '"' + fs.GetFolder( Data.Files.Item(1) ).ShortPath + '"';
+var FileS  = '"' + fs.GetFolder( Data.Files.Item(1) ).ShortPath + '"';
 }
 //alert(FileShort);
-var TheFiles   = File;
+var TheFiles   = FileS;
 var e = "true";
 var n = 2;
 try{
 while(e){
  try{
- var File  = '"' + fs.GetFile( Data.Files.Item(n) ).ShortPath + '"';
+ var FileS  = '"' + fs.GetFile( Data.Files.Item(n) ).ShortPath + '"';
  }catch(e){
- var File  = '"' + fs.GetFolder( Data.Files.Item(n) ).ShortPath + '"';
+ var FileS  = '"' + fs.GetFolder( Data.Files.Item(n) ).ShortPath + '"';
  }
- var TheFiles   = TheFiles + ' ' + FileShort ;
+ var TheFiles   = TheFiles + ' ' + FileS ;
  n ++;
 }
 }catch(e){
 var wsh = new ActiveXObject( "WScript.Shell" );
 var execcommand = sysFolder + '\\cmd.exe \/C start ' + myBatShort + s + outsetShort + s + TheFiles;
 wsh.Exec( execcommand );
+//alert( execcommand );
 }
-}
-window.onload = function() {
-firstread();
-FoldermodeChanging();
-scaleautoChanging();
-modeselect();
-noiselevelrange();
-folderable();
-compressdisable();
-w2xautochange();
-alarmchange();
-iccchange();
-windowresize();
-}
-window.onresize = function(){
-windowresize();
-}
-window.onbeforeunload = function(){
-SettingOutput();
 }
 
 --></script>
