@@ -188,7 +188,7 @@ window.moveTo( splited[23],splited[24] );
 <legend> </legend>
 
 
-<lavel><input type=" " name=" " value=" " id=" " checked="checked"> </lavel>
+<label><input type=" " name=" " value=" " id=" " checked="checked"> </label>
 
 </fieldset>
 </div>
@@ -197,12 +197,12 @@ window.moveTo( splited[23],splited[24] );
 <fieldset>
 
 <legend>使用するwaifu2x</legend>
-<lavel><input type="checkbox" name="usewaifu_autoswitch" id="usewaifu_autoswitch" onchange="w2xautochange();">自動設定</lavel>
+<label><input type="checkbox" name="usewaifu_autoswitch" id="usewaifu_autoswitch" onchange="w2xautochange();" />自動設定</label>
 
 <p>
-<lavel id="usewaifu_lavela"><input type="radio" name="usewaifu" value="waifu2x-converter" id="waifu2x-converter" checked="checked">waifu2x-converter-cpp</lavel>
+<label id="usewaifu_labela"><input type="radio" name="usewaifu" value="waifu2x-converter" id="waifu2x-converter" checked="checked">waifu2x-converter-cpp</label>
 </p><p>
-<lavel id="usewaifu_lavelb"><input type="radio" name="usewaifu" value="waifu2x-caffe-cui" id="waifu2x-caffe-cui">waifu2x-caffe</lavel>
+<label id="usewaifu_labelb"><input type="radio" name="usewaifu" value="waifu2x-caffe-cui" id="waifu2x-caffe-cui">waifu2x-caffe</label>
 </p>
 </fieldset>
 </div>
@@ -211,13 +211,13 @@ window.moveTo( splited[23],splited[24] );
 <fieldset>
 <legend>動作モード</legend>
 <p>
-<lavel><input type="radio" name="mode01" value="auto_scale" id="auto_scale" checked="checked" onchange="modeselect01();">jpeg以外でノイズ除去を行わない</lavel>
+<label><input type="radio" name="mode01" value="auto_scale" id="auto_scale" checked="checked" onchange="modeselect01();">jpeg以外でノイズ除去を行わない</label>
 </p><p>
-<lavel><input type="radio" name="mode01" value="noise_scale" id="noise_scale" onchange="modeselect01();">すべての画像に拡大とノイズ除去</lavel>
+<label><input type="radio" name="mode01" value="noise_scale" id="noise_scale" onchange="modeselect01();">すべての画像に拡大とノイズ除去</label>
 </p><p>
-<lavel><input type="radio" name="mode01" value="scale" id="scale" onchange="modeselect04();">拡大のみ</lavel>
+<label><input type="radio" name="mode01" value="scale" id="scale" onchange="modeselect04();">拡大のみ</label>
 </p><p>
-<lavel><input type="radio" name="mode01" value="noise" id="noise" onchange="modeselect03();">ノイズ除去のみ</lavel>
+<label><input type="radio" name="mode01" value="noise" id="noise" onchange="modeselect03();">ノイズ除去のみ</label>
 </p>
 </fieldset>
 </div>
@@ -226,18 +226,18 @@ window.moveTo( splited[23],splited[24] );
 <fieldset name="F_scale_setting" id="F_scale_setting">
 <legend>拡大率</legend>
 <p>
-<lavel><input type="checkbox" name="scaleauto_check" value="checked" id="scaleauto_check" checked="checked" onclick="scaleautoChanging();">拡大率を自動計算</lavel>
+<label><input type="checkbox" name="scaleauto_check" value="checked" id="scaleauto_check" checked="checked" onclick="scaleautoChanging();">拡大率を自動計算</label>
 </p><table>
 <tbody id="scaleAutoObj">
 <tr><th style="width:25%;">
-<lavel for="scaleauto_width">目標幅:</lavel></th><td id="td_into"><input type="number" value="1920" name="scaleauto_width" id="scaleauto_width" style="width:70px;">px
+<label for="scaleauto_width">目標幅:</label></th><td id="td_into"><input type="number" value="1920" name="scaleauto_width" id="scaleauto_width" style="width:70px;">px
 </td></tr><tr><th>
-<lavel for="scaleauto_height">目標高さ:</lavel></th><td id="td_into"><input type="number" value="1080" name="scaleauto_height" id="scaleauto_height" style="width:70px;">px
+<label for="scaleauto_height">目標高さ:</label></th><td id="td_into"><input type="number" value="1080" name="scaleauto_height" id="scaleauto_height" style="width:70px;">px
 </td></tr>
 </tbody></table>
 <hr style="border:solid 0.5px #494b4f;">
 <table><tbody id="scaleRatioObj"><tr><th style="width:25%;">
-<lavel for="scale_ratio01">拡大率:</lavel></th><td id="td_into"><input type="number" value="2" name="scale_ratio01" step="0.0000001" id="scale_ratio01"  style="width:70px;">倍
+<label for="scale_ratio01">拡大率:</label></th><td id="td_into"><input type="number" value="2" name="scale_ratio01" step="0.0000001" id="scale_ratio01"  style="width:70px;">倍
 </td></tr>
 </tbody>
 </table>
@@ -247,8 +247,8 @@ window.moveTo( splited[23],splited[24] );
 <div name="rightcontent" class="rightcontent">
 <fieldset name="F_noise_setting" id="F_noise_setting">
 <legend>ノイズ除去レベル</legend>
-<lavel>Lv. <span id="noiselevelvalue"></span>
-<br/><input type="range" name="noise_level01" id="noise_level01" max="3" min="1" onchange="noiselevelrange();" style="width:30%;height:14px;"></lavel>
+<label>Lv. <span id="noiselevelvalue"></span>
+<br/><input type="range" name="noise_level01" id="noise_level01" max="3" min="1" onchange="noiselevelrange();" style="width:30%;height:14px;"></label>
 </fieldset>
 </div>
 
@@ -272,19 +272,19 @@ window.moveTo( splited[23],splited[24] );
 <button type="button" onclick="allcheck(inexli01);" >全選択</button><button type="button" onclick="alldisable(inexli01);" >全解除</button>
 <table><tbody>
 <tr><td>
-<lavel><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked">jpg</lavel></td><td>
-<lavel><input type="checkbox" name="inexli01" value="jpeg" id="jpeg" checked="checked">jpeg</lavel>
+<label><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked">jpg</label></td><td>
+<label><input type="checkbox" name="inexli01" value="jpeg" id="jpeg" checked="checked">jpeg</label>
 </td></tr>
 <tr><td>
-<lavel><input type="checkbox" name="inexli01" value="png" id="png" checked="checked">png</lavel></td><td>
-<lavel><input type="checkbox" name="inexli01" value="bmp" id="bmp" checked="checked">bmp</lavel>
+<label><input type="checkbox" name="inexli01" value="png" id="png" checked="checked">png</label></td><td>
+<label><input type="checkbox" name="inexli01" value="bmp" id="bmp" checked="checked">bmp</label>
 </td></tr>
 <tr><td>
-<lavel><input type="checkbox" name="inexli01" value="tif" id="tif" checked="checked">tif</lavel></td><td>
-<lavel><input type="checkbox" name="inexli01" value="tiff" id="tiff" checked="checked">tiff</lavel>
+<label><input type="checkbox" name="inexli01" value="tif" id="tif" checked="checked">tif</label></td><td>
+<label><input type="checkbox" name="inexli01" value="tiff" id="tiff" checked="checked">tiff</label>
 </td></tr>
 <tr><td>
-<lavel><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked">tga</lavel></td><td>
+<label><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked">tga</label></td><td>
 </td></tr>
 </tbody></table>
 </fieldset>
@@ -294,7 +294,7 @@ window.moveTo( splited[23],splited[24] );
 <fieldset>
 <legend>フォルダ入力設定</legend>
 <p>
-<lavel><input type="checkbox" name="subf01" id="subf01" checked="checked">サブフォルダの画像も処理<br>(再帰的に処理する)</lavel>
+<label><input type="checkbox" name="subf01" id="subf01" checked="checked">サブフォルダの画像も処理<br>(再帰的に処理する)</label>
 </p>
 </fieldset>
 </div>
@@ -310,13 +310,13 @@ window.moveTo( splited[23],splited[24] );
 <fieldset>
 <legend>終了時の処理</legend>
 
-<p><lavel><input type="checkbox" name="alarm_switch" id="alarm_switch" onchange="alarmchange();">終了時に音を鳴らす</lavel></p>
-<lavel><input type="file" name="alarmfile" id="alarmfile" accept="audio/wav" style="width:100%;"></lavel></p>
-<p><lavel><input type="checkbox" name="icc_switch" id="icc_switch" onchange="iccchange();">ICCプロファイルを付与する</lavel></p>
-<lavel><input type="file" name="IccProf" id="IccProf" accept=".icc" style="width:100%;"></lavel></p>
+<p><label><input type="checkbox" name="alarm_switch" id="alarm_switch" onchange="alarmchange();">終了時に音を鳴らす</label></p>
+<label><input type="file" name="alarmfile" id="alarmfile" accept="audio/wav" style="width:100%;"></label></p>
+<p><label><input type="checkbox" name="icc_switch" id="icc_switch" onchange="iccchange();">ICCプロファイルを付与する</label></p>
+<label><input type="file" name="IccProf" id="IccProf" accept=".icc" style="width:100%;"></label></p>
 
-<p><lavel><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</lavel></p>
-<p><lavel><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</lavel></p>
+<p><label><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</label></p>
+<p><label><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</label></p>
 
 </fieldset>
 </div>
@@ -326,18 +326,18 @@ window.moveTo( splited[23],splited[24] );
 <fieldset>
 <legend>フォルダ出力設定</legend>
 <p>
-<lavel><input type="radio" name="folderoutmode" value="0" id="0" onchange="FoldermodeChanging();">入力フォルダと同じフォルダ</lavel>
+<label><input type="radio" name="folderoutmode" value="0" id="0" onchange="FoldermodeChanging();">入力フォルダと同じフォルダ</label>
 </p><p>
-<lavel><input type="radio" name="folderoutmode" value="1" id="1" onchange="FoldermodeChanging();">フォルダに出力(分割する)</lavel>
+<label><input type="radio" name="folderoutmode" value="1" id="1" onchange="FoldermodeChanging();">フォルダに出力(分割する)</label>
 </p><p>
-<lavel><input type="radio" name="folderoutmode" value="2" id="2" onchange="FoldermodeChanging();" checked="checked">フォルダに出力(一括する)</lavel>
+<label><input type="radio" name="folderoutmode" value="2" id="2" onchange="FoldermodeChanging();" checked="checked">フォルダに出力(一括する)</label>
 </p><p>
-<lavel><input type="radio" name="folderoutmode" value="3" id="3" onchange="FoldermodeChanging();">圧縮フォルダに出力</lavel>
+<label><input type="radio" name="folderoutmode" value="3" id="3" onchange="FoldermodeChanging();">圧縮フォルダに出力</label>
 </p>
 <table><tbody><tr><th>
-<lavel id="outfolder" for="outfoldernameset">出力フォルダ名：</lavel></th><td><input type="text" name="outfoldernameset" id="outfoldernameset" value="waifued" style="width:70px">
+<label id="outfolder" for="outfoldernameset">出力フォルダ名：</label></th><td><input type="text" name="outfoldernameset" id="outfoldernameset" value="waifued" style="width:70px">
 </td></tr><tr><th>
-<lavel id="outzip" for="compformat">圧縮形式：</lavel></th><td><select name="compformat" id="compformat" style="width:70px">
+<label id="outzip" for="compformat">圧縮形式：</label></th><td><select name="compformat" id="compformat" style="width:70px">
 <option value="7z">7z</option>
 <option value="zip" selected>zip</option>
 <option value="xz">xz</option>
@@ -354,9 +354,9 @@ window.moveTo( splited[23],splited[24] );
 <legend>付加オプション</legend>
 <p>その他のオプションです。(例 : --tta 1 )</p>
 <table><tbody>
-<tr><th><lavel for="otheropco01">converter-cpp:</lavel></th><td style="width:75%;"><input type="text" name="otheropco01" id="otheropco01" style="width:100%;"></td></tr>
-<tr><th><lavel for="otheropco01">caffe:</lavel></th><td style="width:75%;"><input type="text" name="otheropca01" id="otheropca01" style="width:100%;"></td></tr>
-<tr><th><lavel for="otheropsz01">7-zip:</lavel></th><td style="width:75%;"><input type="text" name="otheropsz01" id="otheropsz01" style="width:100%;"></td></tr>
+<tr><th><label for="otheropco01">converter-cpp:</label></th><td style="width:75%;"><input type="text" name="otheropco01" id="otheropco01" style="width:100%;"></td></tr>
+<tr><th><label for="otheropco01">caffe:</label></th><td style="width:75%;"><input type="text" name="otheropca01" id="otheropca01" style="width:100%;"></td></tr>
+<tr><th><label for="otheropsz01">7-zip:</label></th><td style="width:75%;"><input type="text" name="otheropsz01" id="otheropsz01" style="width:100%;"></td></tr>
 </tbody></table>
 </fieldset>
 </div>
@@ -586,13 +586,13 @@ function w2xautochange(){
 if ( document.SettingForm.usewaifu_autoswitch.checked ){
     document.SettingForm.usewaifu[0].disabled = true;
     document.SettingForm.usewaifu[1].disabled = true;
-    document.getElementById("usewaifu_lavela").style.color = "#8899a6";
-    document.getElementById("usewaifu_lavelb").style.color = "#8899a6";
+    document.getElementById("usewaifu_labela").style.color = "#8899a6";
+    document.getElementById("usewaifu_labelb").style.color = "#8899a6";
 } else {
     document.SettingForm.usewaifu[0].disabled = false;
     document.SettingForm.usewaifu[1].disabled = false;
-    document.getElementById("usewaifu_lavela").style.color = "#FFFFFF";
-    document.getElementById("usewaifu_lavelb").style.color = "#FFFFFF";
+    document.getElementById("usewaifu_labela").style.color = "#FFFFFF";
+    document.getElementById("usewaifu_labelb").style.color = "#FFFFFF";
 }
 }
 
