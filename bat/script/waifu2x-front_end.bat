@@ -26,7 +26,7 @@ type NUL > "%fname_txt%"
 
 set Dquarto=^"
 
-for /F "usebackq tokens=1-22" %%a in ( "%~1" ) do (
+for /F "usebackq tokens=1-23" %%a in ( "%~1" ) do (
 set mode01=%%a
 rem auto_scale
 if  "%debug_hi%" == "true" echo mode01 !mode01!
@@ -107,18 +107,20 @@ set IccProf=!IccProf11:△=^ !
 if "!IccProf11!" == "none" set IccProf=
 if  "%debug_hi%" == "true" echo IccProf !IccProf!
 
-
 set otheropca11=%%~s
 set otheropco11=%%~t
 set otherop7z11=%%~u
+set otheropff11=%%~v
 
 set otheropca01=!otheropca11:△=^ !
 set otheropco01=!otheropco11:△=^ !
 set otherop7z01=!otherop7z11:△=^ !
+set otheropff01=!otheropff11:△=^ !
 
 if  "%debug_hi%" == "true" echo otheropca01 !otheropca01! in %%~s
 if  "%debug_hi%" == "true" echo otheropco01 !otheropco01! in %%~t
 if  "%debug_hi%" == "true" echo otherop7z01 !otherop7z01! in %%~u
+if  "%debug_hi%" == "true" echo otherop7z01 !otherop7z01! in %%~v
 )
 if "%otheropca11%" == "" (
  set otheropca01=
@@ -126,8 +128,11 @@ if "%otheropca11%" == "" (
 if "%otheropco11%" == "" (
  set otheropco01=
 )
-if "%otheropco11%" == "" (
- set otheropco01=
+if "%otherop7z11%" == "" (
+ set otherop7z01=
+)
+if "%otheropff11%" == "" (
+ set otheropff01=
 )
 if  "%debug_hi%" == "true" echo %otheropco11% → %otheropco01%
 if  "%debug_hi%" == "true" echo %otheropca11% → %otheropca01%
@@ -140,6 +145,7 @@ if  "%debug_hi%" == "true" pause
 set scale_ratio02=%scale_ratio01%
 
 :start
+set exte=.png
 set per=%%
 set hoge=*.%inexli01::= *.%
 
@@ -339,21 +345,14 @@ if "%mode01%" == "scale" goto nam_c
 
 
 :nam_auto
-if /I "%~x1" == ".jpg" (
- set jpegfile=true
- goto nam_a
- ) else if /I "%~x1" == ".jpeg" (
- set jpegfile=true
+if "!jpegfile!" == "true" (
  goto nam_a
  ) else (
- set jpegfile=false
  goto nam_c
  )
 :nam_noiseorno
 if "%mode01%" == "auto_scale" (
-if /I "%~x1" == ".jpg" (
- goto nam_b
- ) else if /I "%~x1" == ".jpeg" (
+if "!jpegfile!" == "true" (
  goto nam_b
  ) else (
  set nowaifu=true
@@ -545,23 +544,6 @@ if !number! GTR 1 (
 set animation=true
 ) else (
 set animation=false
-if /I "%~x1" == ".gif" (
-set GifFlag=true
-convert "%~1" "%~dpn1_w2xbat.png"
-set exte02=%exte%
-set exte=.png
-call :dow2x "%~dpn1_w2xbat.png"
-set exte=!exte02!
-set allis=true
-call :shimatsu "!outfolder!\!mode01nam!"
-call :gifname "!outfolder!\!mode01nam!"
-convert "!outfolder!\!mode01nam!" "!GifPath!"
-Del /Q "%~dpn1_w2xbat.png" > NUL 2>&1
-Del /Q "!outfolder!\!mode01nam!" > NUL 2>&1
-) else (
-set GifFlag=false
-set allis=no
-)
 exit /b
 )
 if /I "%~x1" == ".gif" (
@@ -616,7 +598,7 @@ set fps_txt=%TMP%\w2xfps.txt
 type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
 ffmpeg -i "%~1" > "!ffmpeg_txt!" 2>&1
-CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!"
+CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!" > NUL 2>&1
 set /P FPS= < "!fps_txt!"
 type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
@@ -679,7 +661,7 @@ echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 ) else (
-ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff% "!outfolder!\!mode01nam!"
+ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
@@ -745,12 +727,6 @@ goto end
 
 :dow2x
 
-echo.
-echo. >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
-echo !DATE! !TIME! "%~1"の変換を開始します...
-
-
 if "%folderoutmode%" == "0" (
 set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
@@ -809,10 +785,33 @@ set FilePath=%~dp1!FileName!
 
 goto end
 :===========================================================================================================================================
+:noext
+set NoExtPath=%~dpn1
+goto end
+:===========================================================================================================================================
 
 :shimatsu
+if /I not "%~x1" == ".png" (
+Del "!PngFilePath!" > NUL 2>&1
+)
+call :noext !outfolder!\!mode01nam!
+if not "%OutputExtension%" == "png" (
+
+ if "%OutputExtension%" == "false" (
+ convert "!outfolder!\!mode01nam!" "!NoExtPath!%~x1"
+ if /I not "%~x1" == ".png" del "!outfolder!\!mode01nam!" > NUL 2>&1
+ ) else (
+ convert "!outfolder!\!mode01nam!" "!NoExtPath!.%OutputExtension%"
+ del "!outfolder!\!mode01nam!" > NUL 2>&1
+ )
+if not "%IccProf%" == "" (
+convert "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!NoExtPath!.%OutputExtension%" >>"%logname%.log" 2>>&1
+)
+
+) else (
 if not "%IccProf%" == "" (
 convert "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+)
 )
 
 if "%twittermode%" == "true" (
@@ -825,6 +824,24 @@ if "%twittermode%" == "true" (
 )
 goto end
 
+:===========================================================================================================================================
+
+:toPng
+if /I not "%~x1" == ".png" (
+set Pngtf=false
+convert "%~1" "%~dpn1.png"
+if /I "%~x1" == ".jpg" (
+ set jpegfile=true
+ ) else if /I "%~x1" == ".jpeg" (
+ set jpegfile=true
+ ) else (
+ set jpegfile=false
+ )
+) else (
+set Pngtf=true
+)
+set PngFilePath=%~dpn1.png
+goto end
 :===========================================================================================================================================
 
 :w2x_file
@@ -842,11 +859,9 @@ if /I "%ex%" == ".%%a" set excheckr=true
 
 if "!excheckr!" == "true" (
 endlocal
-
  goto okayex
  ) else (
  endlocal
- 
  echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。 >>"%logname%.log" 2>>&1
  echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。
  goto nextforex
@@ -859,15 +874,17 @@ call :outfilename_a "%~1"
 )
 
 call :animation "!FilePath!"
-
 if "!allis!" == "true" (
 shift
 goto nextforex
-
 )
-call :dow2x "!FilePath!"
-
-call :shimatsu
+call :toPng "!FilePath!"
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "!FilePath!"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "!FilePath!"の変換を開始します...
+call :dow2x "!PngFilePath!"
+call :shimatsu "!FilePath!"
 
 shift
 :nextforex
@@ -922,8 +939,14 @@ call :outfilename_a "%~1"
 )
 call :animation "!FilePath!"
 if "!allis!" == "true" exit /b
-call :dow2x "!FilePath!"
-call :shimatsu
+
+call :toPng "!FilePath!"
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "!FilePath!"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "!FilePath!"の変換を開始します...
+call :dow2x "!PngFilePath!"
+call :shimatsu "!FilePath!"
 goto end
 :===========================================================================================================================================
 

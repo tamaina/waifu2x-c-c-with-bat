@@ -315,15 +315,15 @@ window.moveTo( splited[24],splited[25] );
 </fieldset>
 </div>
 
-<div name="left_content" class="left_content">
+<div name="rightcontent" class="rightcontent">
 <fieldset>
 <legend>出力拡張子</legend>
-<p><label><input type="checkbox" name="extension_switch" id="extension_switch" onchange="extechange();">元のファイルと同じ拡張子にする</label></p>
+<p><label><input type="checkbox" name="extension_switch" id="extension_switch" onchange="extechange();">出力した画像の拡張子を統一する</label></p>
 <input type="text" name="OutputExtension" value="png" id="OutputExtension" style="width:50px;">
 </fieldset>
 </div>
 
-<div name="rightcontent" class="rightcontent">
+<div name="left_content" class="left_content">
 <fieldset>
 <legend>終了時の処理</legend>
 
@@ -339,7 +339,7 @@ window.moveTo( splited[24],splited[25] );
 </div>
 
 
-<div name="left_content" class="left_content">
+<div name="rightcontent" class="left_content">
 <fieldset>
 <legend>フォルダ出力設定</legend>
 <p>
@@ -381,6 +381,8 @@ window.moveTo( splited[24],splited[25] );
 <div style="clear:both;">
 <p>参考……</p>
 <p>システム音のフォルダは C:\Windows\Media です。<br>iccの場所はC:\Windows\System32\spool\drivers\colorです。<br>HTAとIEの仕様により、次回起動時にファイル名は保持されません。</p>
+<p></p>
+<p>透過情報付きアニメーションGIFはalpha情報をバッチファイルで処理します。</p>
 </div>
 </form>
 <object id='ddObj' classid='CLSID:8E3867A3-8586-11D1-B16A-00C0F0283628'
@@ -601,9 +603,9 @@ if ( document.SettingForm.icc_switch.checked ){
 }
 function extechange(){
 if ( document.SettingForm.extension_switch.checked ){
-    document.SettingForm.OutputExtension.disabled = true;
-} else {
     document.SettingForm.OutputExtension.disabled = false;
+} else {
+    document.SettingForm.OutputExtension.disabled = true;
 }
 }
 
@@ -724,7 +726,7 @@ var IccProf = '\"' + form.IccProf.value.replace( /\ /g , "△" ) + '\"';
 } else {
 var IccProf = "none";
 }
-if ( !form.extension_switch.checked ){
+if ( form.extension_switch.checked ){
 if ( form.OutputExtension.value == "" ){
 var OutputExtension = "false";
 } else {
