@@ -24,7 +24,7 @@ var mag_candid_h   = target_height / img_height;
 WSH.echo( mag_candid_w );
 WSH.echo( mag_candid_h );
 
-if ( objArgs(6) ) {
+if ( objArgs(6) == "true" ) {
 
  if ( mag_candid_w <= 1 && mag_candid_h <= 1 && mag_candid_w <= mag_candid_h ) {
  var Magnific    = "0";

@@ -162,11 +162,15 @@ form.alphaswitch.checked = true;
 form.alphaswitch.checked = false;
 }
 form.OutputExtension.value                             = splited[16];
+if ( splited[16] == "false" ) {
+form.OutputExtension.value = "" ;
+}
 form.otheropca01.value                                 = splited[18].replace( /\"/g , "" ).replace( "△" ," " );
 form.otheropco01.value                                 = splited[19].replace( /\"/g , "" ).replace( "△" ," " );
 form.otheropsz01.value                                 = splited[20].replace( /\"/g , "" ).replace( "△" ," " );
-window.resizeTo( splited[21],splited[22] );
-window.moveTo( splited[23],splited[24] );
+form.otheropff01.value                                 = splited[21].replace( /\"/g , "" ).replace( "△" ," " );
+window.resizeTo( splited[22],splited[23] );
+window.moveTo( splited[24],splited[25] );
 }
 --></script>
 <title>waifu2x GUI</title>
@@ -285,6 +289,18 @@ window.moveTo( splited[23],splited[24] );
 </td></tr>
 <tr><td>
 <label><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked">tga</label></td><td>
+<label><input type="checkbox" name="inexli01" value="gif" id="gif" checked="checked">gif</label>
+</td></tr>
+</tbody></table>
+<hr style="border:solid 0.5px #494b4f;">
+<table><tbody>
+<tr><td>
+<label><input type="checkbox" name="inexli01" value="mp4" id="mp4" checked="checked">mp4</label></td><td>
+<label><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked">avi</label>
+</td></tr>
+<tr><td>
+<label><input type="checkbox" name="inexli01" value="wmv" id="wmv" checked="checked">wmv</label></td><td>
+<!--<label><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked">avi</label>-->
 </td></tr>
 </tbody></table>
 </fieldset>
@@ -302,6 +318,7 @@ window.moveTo( splited[23],splited[24] );
 <div name="left_content" class="left_content">
 <fieldset>
 <legend>出力拡張子</legend>
+<p><label><input type="checkbox" name="extension_switch" id="extension_switch" onchange="extechange();">元のファイルと同じ拡張子にする</label></p>
 <input type="text" name="OutputExtension" value="png" id="OutputExtension" style="width:50px;">
 </fieldset>
 </div>
@@ -357,6 +374,7 @@ window.moveTo( splited[23],splited[24] );
 <tr><th><label for="otheropco01">converter-cpp:</label></th><td style="width:75%;"><input type="text" name="otheropco01" id="otheropco01" style="width:100%;"></td></tr>
 <tr><th><label for="otheropco01">caffe:</label></th><td style="width:75%;"><input type="text" name="otheropca01" id="otheropca01" style="width:100%;"></td></tr>
 <tr><th><label for="otheropsz01">7-zip:</label></th><td style="width:75%;"><input type="text" name="otheropsz01" id="otheropsz01" style="width:100%;"></td></tr>
+<tr><th><label for="otheropff01">ffmpeg:</label></th><td style="width:75%;"><input type="text" name="otheropff01" id="otheropff01" style="width:100%;"></td></tr>
 </tbody></table>
 </fieldset>
 </div>
@@ -581,6 +599,13 @@ if ( document.SettingForm.icc_switch.checked ){
     document.SettingForm.IccProf.disabled = true;
 }
 }
+function extechange(){
+if ( document.SettingForm.extension_switch.checked ){
+    document.SettingForm.OutputExtension.disabled = true;
+} else {
+    document.SettingForm.OutputExtension.disabled = false;
+}
+}
 
 function w2xautochange(){
 if ( document.SettingForm.usewaifu_autoswitch.checked ){
@@ -670,10 +695,7 @@ var alphaswitch = form.alphaswitch.checked;
 var otheropca01 = '\"' + form.otheropca01.value.replace( / /g , "△" ) + '\"';
 var otheropco01 = '\"' + form.otheropco01.value.replace( / /g , "△" ) + '\"';
 var otheropsz01 = '\"' + form.otheropsz01.value.replace( / /g , "△" ) + '\"';
-var OutputExtension = form.OutputExtension.value;
-if ( form.OutputExtension.value == "" ){
-var OutputExtension = "png";
-}
+var otheropff01 = '\"' + form.otheropff01.value.replace( / /g , "△" ) + '\"';
 if ( otheropca01 == "" ){
 var otheropca01 = '\"' + "none" + '\"';
 }
@@ -702,7 +724,16 @@ var IccProf = '\"' + form.IccProf.value.replace( /\ /g , "△" ) + '\"';
 } else {
 var IccProf = "none";
 }
-var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
+if ( !form.extension_switch.checked ){
+if ( form.OutputExtension.value == "" ){
+var OutputExtension = "false";
+} else {
+var OutputExtension = form.OutputExtension.value;
+}
+} else {
+var OutputExtension = "false";
+}
+var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
 
 
 // 参考→ http://sei.qee.jp/docs/program/hta/location/href.html
@@ -734,6 +765,7 @@ compressdisable();
 w2xautochange();
 alarmchange();
 iccchange();
+extechange();
 windowresize();
 }
 window.onresize = function(){

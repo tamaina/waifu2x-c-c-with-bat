@@ -11,7 +11,6 @@ set batdp=%CD%
 pushd ..
 Path=%PATH%;%CD%
 
-set out_ext01=png
 set thebat="%~0"
 set batnx=%~nx0
 set batnm=%~n0
@@ -141,9 +140,7 @@ if  "%debug_hi%" == "true" pause
 set scale_ratio02=%scale_ratio01%
 
 :start
-if "%OutputExtension%" == "" (
-set OutputExtension=png
-)
+set per=%%
 set hoge=*.%inexli01::= *.%
 
 pushd "%~1" > NUL 2>&1
@@ -361,7 +358,6 @@ if /I "%~x1" == ".jpg" (
  ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
- set mode01namwoex=%~n1_reduced
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -375,7 +371,6 @@ if /I "%~x1" == ".jpg" (
 ) else (
  set nowaifu=true
  set mode01nam=%~n1_reduced!exte!
- set mode01namwoex=%~n1_reduced
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -390,10 +385,8 @@ if /I "%~x1" == ".jpg" (
 set scaling=true
 if "%scaleauto%" == "true" (
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%!exte!
-set mode01namwoex=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%
 ) else (
 set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x!exte!
-set mode01namwoex=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x
 )
 set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
 goto EONam
@@ -402,7 +395,6 @@ goto EONam
 
 set scaling=false
 set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
-set mode01namwoex=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%
 set mode01var=-m noise --noise_level %noise_level01%
 goto EONam
 
@@ -411,10 +403,8 @@ goto EONam
 set scaling=true
 if "%scaleauto%" == "true" (
 set mode01nam=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%!exte!
-set mode01namwoex=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%
 ) else (
 set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x!exte!
-set mode01namwoex=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x
 )
 set mode01var=-m scale --scale_ratio %scale_ratio01%
 goto EONam
@@ -429,10 +419,10 @@ if "%scaleauto%" == "true" (
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
 )
-for /f %%x in ( 'identify -format ^"%%w^" %1' ) do (
+for /f %%x in ( 'identify -format "%%w\n" "%~1"' ) do (
 set imagewidth=%%x
 )
-for /f %%y in ( 'identify -format ^"%%h^" %1' ) do (
+for /f %%y in ( 'identify -format "%%h\n" "%~1"' ) do (
 set imageheight=%%y
 )
 CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" !imageheight! !imagewidth! %scaleauto% %scale_ratio02% > NUL 2>&1
@@ -440,9 +430,7 @@ CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_heig
 set /P scale_ratio01= < "%multset_txt%"
 type NUL > "%multset_txt%
 if "%scaleauto%" == "true" (
-if !scale_ratio01! LEQ 1 (
-echo !DATE! !TIME! 計算完了 : 拡大しません。
-) else (
+if not !scale_ratio01! LEQ 1 (
 echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 )
 )
@@ -450,6 +438,7 @@ echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 if "%scaleauto%" == "false" (
 set /A "scaleauto_width01 = imagewidth * scale_ratio02"
 set /A "scaleauto_height01 = imageheight * scale_ratio02"
+echo !DATE! !TIME! 計算完了 : !scale_ratio01!倍に拡大し、そこから縮小します。
 )
 
 goto end
@@ -465,21 +454,21 @@ set whiteimage=%TMP%\white-%~n1.png
 set blackimage=%TMP%\black-%~n1.png
 set alphaimage=%TMP%\alpha-%~n1.png
 set waifualpha_nam=waifualpha-%~n1.png
-set waifualpha=%TMP%\%waifualpha_nam%
+set waifualpha=%TMP%\!waifualpha_nam!
 set sourcenoalpha_nam=noalphasource-%~n1.png
-set sourcenoalpha=%TMP%\%sourcenoalpha_nam%
+set sourcenoalpha=%TMP%\!sourcenoalpha_nam!
 set waifuednoalpha_nam=waifuedsource-%~n1.png
-set waifuednoalpha=%TMP%\%waifuednoalpha_nam%
+set waifuednoalpha=%TMP%\!waifuednoalpha_nam!
 set doingalpha=true
 
 set debugmode=false
 
-convert -size %imagewidth%x%imageheight% xc:white "!whiteimage!"
-convert -size %imagewidth%x%imageheight% xc:black "!blackimage!"
+convert -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
+convert -size !imagewidth!x!imageheight! xc:black "!blackimage!"
 composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
 composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
 set CMD_IDENTIFY=identify -format "%%k" "!alphaimage!"
-for /f "usebackq delims=" %%a in (`%CMD_IDENTIFY%`) do set image_mean=%%a
+for /f "usebackq delims=" %%a in (`!CMD_IDENTIFY!`) do set image_mean=%%a
 
 if "!image_mean!" == "1" (
 echo !DATE! !TIME! alpha情報はありませんでした。 >>"%logname%.log" 2>>&1
@@ -493,27 +482,28 @@ convert "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
  echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
  echo alpha情報をwaifu2xで拡大します...
 setlocal
-set mode01var=-m scale --scale_ratio %scale_ratio01%
+set mode01var=-m scale --scale_ratio !scale_ratio01!
 set outfolder=%TMP%
 set mode01nam=!waifualpha_nam!
-set otheropco=
-set otheropca=
 set twittermode=false
 call :command_w2x "!alphaimage!"
 endlocal
+if /I "!GifFlag!" == "true" (
+convert "!waifualpha!" -threshold 50%% "!waifualpha!"
+)
+
  echo !DATE! !TIME! 本体をwaifu2xで処理します... >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 本体をwaifu2xで処理します...
 setlocal
 set outfolder=%TMP%
 set mode01nam=!waifuednoalpha_nam!
-set otheropco=
-set otheropca=
 set twittermode=false
 call :command_w2x "!sourcenoalpha!"
 endlocal
+
  echo !DATE! !TIME! alpha情報と本体を合成します...
  echo !DATE! !TIME! alpha情報と本体を合成します...  >>"%logname%.log" 2>>&1
-composite "!waifualpha!" "!waifuednoalpha!" -alpha off -compose CopyOpacity "!outfolder!\!mode01nam!"
+composite "!waifualpha!" "!waifuednoalpha!" -alpha off -compose CopyOpacity png32:"!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
@@ -526,7 +516,7 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
 )
-set allis=okay
+set allis=true
 if "%debugmode%" == "false" (
 Del "!waifualpha!"
 Del "!waifuednoalpha!"
@@ -540,7 +530,170 @@ Del "!alphaimage!"
 )
 set doingalpha=false
 goto end
+:===========================================================================================================================================
+:gifname
+set GifPath=%~dpn1.gif
+goto end
+:===========================================================================================================================================
 
+:animation
+set number=0
+for /f "delims=" %%a in ( 'identify "%~1"' ) do (
+set /A "number = number + 1"
+)
+if !number! GTR 1 (
+set animation=true
+) else (
+set animation=false
+if /I "%~x1" == ".gif" (
+set GifFlag=true
+convert "%~1" "%~dpn1_w2xbat.png"
+set exte02=%exte%
+set exte=.png
+call :dow2x "%~dpn1_w2xbat.png"
+set exte=!exte02!
+set allis=true
+call :shimatsu "!outfolder!\!mode01nam!"
+call :gifname "!outfolder!\!mode01nam!"
+convert "!outfolder!\!mode01nam!" "!GifPath!"
+Del /Q "%~dpn1_w2xbat.png" > NUL 2>&1
+Del /Q "!outfolder!\!mode01nam!" > NUL 2>&1
+) else (
+set GifFlag=false
+set allis=no
+)
+exit /b
+)
+if /I "%~x1" == ".gif" (
+echo アニメーションGIFを入力しました。画像枚数が多いと処理に時間がかかりますが、よろしいですか？
+echo !TIME! 操作がなければ1分後に開始します...
+set anmMode=GIF
+set GifFlag=true
+) else (
+echo 動画ファイルを入力しました。フレーム数が多いと処理に時間がかかりますが、よろしいですか？
+echo !TIME! 操作がなければ1分後に開始します...
+set anmMode=MOV
+)
+Choice /T 60 /D Y /N /M "Y:すぐ続ける N:やめる"
+if errorlevel 2 (
+set stopandnext=true
+exit /b
+)
+
+echo.
+echo. >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~1"の変換を開始します...
+
+set stopandnext=false
+if "%folderoutmode%" == "0" (
+set outfolder=%~dp1
+) else if "%folderoutmode%" == "1" (
+set outfolder=%~dp1\%outfoldernameset%
+)
+
+call :multiplier "%~1"
+set exte02=%exte%
+set exte=%~x1
+call :namer "%~1"
+set exte=!exte02!
+if /I "%~x1" == ".gif" (
+for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
+set FPS=%%t
+)
+set identify_txt=%TMP%\w2xident.txt
+set transparent_txt=%TMP%\w2xtp.txt
+type NUL > "!identify_txt!"
+type NUL > "!transparent_txt!"
+identify -verbose "%~1" > "!identify_txt!" 2>&1
+CScript "%batdp%\script\extract-transparent.js" "!identify_txt!" "!transparent_txt!" > NUL 2>&1
+set /P transparent= < "!transparent_txt!"
+type NUL > "!identify_txt!"
+type NUL > "!transparent_txt!"
+) else (
+set ffmpeg_txt=%TMP%\w2xffmpeg.txt
+set fps_txt=%TMP%\w2xfps.txt
+type NUL > "!ffmpeg_txt!"
+type NUL > "!fps_txt!"
+ffmpeg -i "%~1" > "!ffmpeg_txt!" 2>&1
+CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!"
+set /P FPS= < "!fps_txt!"
+type NUL > "!ffmpeg_txt!"
+type NUL > "!fps_txt!"
+)
+set TMP_ANM=%TMP%\%~n1-anm
+set wfd_folder=%TMP%\%~n1-anm-waifued
+set Serialed_Picture=!TMP_ANM!\%~n1
+mkdir "!TMP_ANM!" > NUL 2>&1
+mkdir "!wfd_folder!" > NUL 2>&1
+
+convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
+
+setlocal
+set outfolder=!wfd_folder!
+set twittermode=false
+set /A "number=number - 1"
+:anm_loop
+if !number! LEQ 9 (
+set renban=00000000000!number!
+) else if !number! LEQ 99 (
+set renban=0000000000!number!
+) else if !number! LEQ 999 (
+set renban=000000000!number!
+) else if !number! LEQ 9999 (
+set renban=00000000!number!
+) else if !number! LEQ 99999 (
+set renban=0000000!number!
+) else if !number! LEQ 999999 (
+set renban=000000!number!
+) else if !number! LEQ 9999999 (
+set renban=00000!number!
+) else if !number! LEQ 99999999 (
+set renban=0000!number!
+) else if !number! LEQ 999999999 (
+set renban=000!number!
+) else if !number! LEQ 9999999999 (
+set renban=00!number!
+) else if !number! LEQ 99999999999 (
+set renban=0!number!
+) else if !number! LEQ 999999999999 (
+set renban=!number!
+)
+
+set mode01nam=wfd_%~n1-!renban!.png
+if "!anmMode!" == "GIF" (
+call :alpha "!Serialed_Picture!-!renban!.png"
+goto anm_end_for
+)
+call :command_w2x "!Serialed_Picture!-!renban!.png"
+:anm_end_for
+set /A "number = number - 1"
+if !number! GEQ 0 goto anm_loop
+set allis=true
+endlocal
+
+
+if "!anmMode!" == "GIF" (
+convert -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
+echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+) else (
+ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff% "!outfolder!\!mode01nam!"
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
+echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+)
+Del /Q !TMP_ANM! > NUL 2>&1
+Del /Q !wfd_folder! > NUL 2>&1
+ call wtb.bat STOP
+ echo . >>"%logname%.log" 2>>&1
+ call wtb.bat PRINT >>"%logname%.log" 2>>&1
+ echo .
+ call wtb.bat PRINT
+set allis=true
+
+goto end
 :===========================================================================================================================================
 
 :command_w2x
@@ -548,7 +701,7 @@ if "!usewaifu:converter=!" NEQ "!usewaifu!" (
 !usewaifu! --model_dir ".\models\%model01%" !mode01var! -j %NUMBER_OF_PROCESSORS% -i "%~1" -o "!outfolder!\!mode01nam!" %otheropco01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else if "!usewaifu:caffe=!" NEQ "!usewaifu!" (
-!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "!outfolder!\!mode01nam!" -l %inexli01% -e png %otheropca01% >>"%logname%.log" 2>>&1
+!usewaifu! -p !process01! --model_dir ".\models\%model01%" !mode01var! -i "%~1" -o "!outfolder!\!mode01nam!" -l %inexli01% -e %OutputExtension% %otheropca01% >>"%logname%.log" 2>>&1
 set w2xERROR=!ERRORLEVEL!
 ) else (
 echo Error！！！ 0x00 >>"%logname%.log" 2>>&1
@@ -597,32 +750,26 @@ echo. >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
 
+
 if "%folderoutmode%" == "0" (
-set outfolder=%~dp1%
+set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
-set outfolder=%~dp1%\%outfoldernameset%
+set outfolder=%~dp1\%outfoldernameset%
 )
 
 mkdir "!outfolder!" > NUL 2>&1
 
-if "%out_ext01%" NEQ "" (
- set exte=.%out_ext01%
- ) else (
- set exte=%~x1
- )
-
 call :multiplier "%~1"
-
 call :namer "%~1"
 if "!nowaifu!" == "true" exit /b
 if "%alphaswitch%" == "true" (
 if "%scaling%" == "true" (
-if "%jpegfile%" == "false" (
+if "!jpegfile!" == "false" (
 call :alpha "%~1"
 )
 )
 )
-if "%allis%" == "okay" exit /b
+if "!allis!" == "true" exit /b
 
 call :command_w2x "%~1"
 
@@ -655,27 +802,17 @@ goto end
 :===========================================================================================================================================
 
 :LongFilePath
-for /f "delims=" %%p in ( 'call %batdp%\longname.bat "%~1"' ) do (
+for /f "delims=" %%p in ( 'call "%batdp%\longname.bat" "%~1"' ) do (
 set FileName=%%p
 )
-
 set FilePath=%~dp1!FileName!
 
 goto end
 :===========================================================================================================================================
 
 :shimatsu
-if not "%OutputExtension%" == "png" (
-convert "!outfolder!\!mode01nam!" "!outfolder!\!mode01namwoex!.%OutputExtension%"
-del "!outfolder!\!mode01nam!"
-if not "%IccProf%" == "" (
-convert "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!outfolder!\!mode01namwoex!.%OutputExtension%" >>"%logname%.log" 2>>&1
-)
-
-) else (
 if not "%IccProf%" == "" (
 convert "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
-)
 )
 
 if "%twittermode%" == "true" (
@@ -687,6 +824,7 @@ if "%twittermode%" == "true" (
  echo 生成画像名:forTwitter_!mode01nam!
 )
 goto end
+
 :===========================================================================================================================================
 
 :w2x_file
@@ -704,9 +842,11 @@ if /I "%ex%" == ".%%a" set excheckr=true
 
 if "!excheckr!" == "true" (
 endlocal
+
  goto okayex
  ) else (
  endlocal
+ 
  echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。 >>"%logname%.log" 2>>&1
  echo "!FileName!"を読み込みましたが、バッチファイルで指定された拡張子の中に"%~x1"がなかったため変換しません。
  goto nextforex
@@ -718,15 +858,21 @@ call :outfilename_a "%~1"
 call :outfilename_a "%~1"
 )
 
+call :animation "!FilePath!"
+
+if "!allis!" == "true" (
+shift
+goto nextforex
+
+)
 call :dow2x "!FilePath!"
 
 call :shimatsu
-:nextforex
- shift
- if "%~1" == "" goto Finish_w2x
- goto shiwake
 
-:===========================================================================================================================================
+shift
+:nextforex
+if "%~1" == "" goto Finish_w2x
+goto shiwake
 
 :===========================================================================================================================================
 :w2x_folder
@@ -774,11 +920,10 @@ call :outfilename_b "%~1" "%~3"
 call :outfilename_a "%~1"
 )
 )
-
+call :animation "!FilePath!"
+if "!allis!" == "true" exit /b
 call :dow2x "!FilePath!"
-
 call :shimatsu
-
 goto end
 :===========================================================================================================================================
 
