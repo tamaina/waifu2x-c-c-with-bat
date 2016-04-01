@@ -276,33 +276,34 @@ window.moveTo( splited[24],splited[25] );
 <button type="button" onclick="allcheck(inexli01);" >全選択</button><button type="button" onclick="alldisable(inexli01);" >全解除</button>
 <table><tbody>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked">jpg</label></td><td>
-<label><input type="checkbox" name="inexli01" value="jpeg" id="jpeg" checked="checked">jpeg</label>
+<label><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked" onchange="funcinexli();">jpg</label></td><td>
+<label><input type="checkbox" name="inexli01" value="jpeg" id="jpeg" checked="checked" onchange="funcinexli();">jpeg</label>
 </td></tr>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="png" id="png" checked="checked">png</label></td><td>
-<label><input type="checkbox" name="inexli01" value="bmp" id="bmp" checked="checked">bmp</label>
+<label><input type="checkbox" name="inexli01" value="png" id="png" checked="checked" onchange="funcinexli();">png</label></td><td>
+<label><input type="checkbox" name="inexli01" value="bmp" id="bmp" checked="checked" onchange="funcinexli();">bmp</label>
 </td></tr>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="tif" id="tif" checked="checked">tif</label></td><td>
-<label><input type="checkbox" name="inexli01" value="tiff" id="tiff" checked="checked">tiff</label>
+<label><input type="checkbox" name="inexli01" value="tif" id="tif" checked="checked" onchange="funcinexli();">tif</label></td><td>
+<label><input type="checkbox" name="inexli01" value="tiff" id="tiff" checked="checked" onchange="funcinexli();">tiff</label>
 </td></tr>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked">tga</label></td><td>
-<label><input type="checkbox" name="inexli01" value="gif" id="gif" checked="checked">gif</label>
+<label><input type="checkbox" name="inexli01" value="tga" id="tga" checked="checked" onchange="funcinexli();">tga</label></td><td>
+<label><input type="checkbox" name="inexli01" value="gif" id="gif" checked="checked" onchange="funcinexli();">gif</label>
 </td></tr>
 </tbody></table>
 <hr style="border:solid 0.5px #494b4f;">
 <table><tbody>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="mp4" id="mp4" checked="checked">mp4</label></td><td>
-<label><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked">avi</label>
+<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="mp4" id="mp4" checked="checked" onchange="funcinexli();">mp4</label></td><td>
+<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked" onchange="funcinexli();">avi</label>
 </td></tr>
 <tr><td>
-<label><input type="checkbox" name="inexli01" value="wmv" id="wmv" checked="checked">wmv</label></td><td>
-<!--<label><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked">avi</label>-->
+<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="wmv" id="wmv" checked="checked" onchange="funcinexli();">wmv</label></td><td>
+<!--<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked" onchange="funcinexli();">avi</label>-->
 </td></tr>
 </tbody></table>
+<p>※動画の音声の合成は現バージョンでは対応していません。別途EcoDecoToolとAviutlで行ってください。</p>
 </fieldset>
 </div>
 
@@ -386,14 +387,26 @@ window.moveTo( splited[24],splited[25] );
 </div>
 </form>
 <object id='ddObj' classid='CLSID:8E3867A3-8586-11D1-B16A-00C0F0283628'
- style='text-align:center;text-size:200%;margin-left:-7%;top:85vh;height:15vh;display:block;position:fixed;width:100%;border-top:ridge 7px #000000;background-color:#000000;'>
+ style='text-align:center;text-size:200%;margin-left:-7%;bottom:71px;height:13vh;display:block;position:fixed;width:100%;border-top:ridge 3px #000000;background-color:#000000;'>
 <param name='OLEDropMode' value='1'>
 <param name='Style' value='1'>
 <param name='Simpletext' value='ここにファイルをドラッグアンドドロップすると変換が始まります。'>
 </object>
+<div style="clear:both;display:block;position:fixed;bottom:50px;height:21px;margin-left:-7%;background-color:#CCCCCC;width:100%;border-top:solid 1px #000000;padding:0;color:black;">
+<p style="margin:0;padding:0;font-size:11pt;">下の[参照]でファイルを選択し、[変換開始]を押すと変換を開始します。</p>
+</div>
+<form name="InputForm" id="InputForm">
+<div style="clear:both;display:block;position:fixed;bottom:0px;height:50px;margin-left:-7%;background-color:#000000;width:100%;">
+<span id="inputfilehtml"></span>
+<button type="button" onclick="StartButton();" style="border:solid 1px #AA0000;font-size:16pt;clear:both;display:block;position:fixed;width:20%;margin-left:80%;height:50px;background-color:#FF0000;bottom:0px">変換開始</button>
+</div>
+</form>
 
-<div style="padding-top:15vh;">
-<p> </p>
+<div style="padding-top:13vh;">
+<p>waifu2x</p>
+</div>
+<div style="padding-top:71spx;">
+<p>GUI</p>
 </div>
 
 <script type='text/JavaScript'><!--
@@ -623,6 +636,9 @@ if ( document.SettingForm.usewaifu_autoswitch.checked ){
 }
 }
 
+
+
+
 function SettingOutput(){
 
 var s = "\ ";
@@ -668,20 +684,9 @@ var mode01 = "scale";
 var mode01 = "noise";
 }
 var model01 = form.model01.value;
-var inexlim;
-for ( i=0; i < form.inexli01.length; i++ ){
-if ( form.inexli01[i].checked ){
-if ( inexlim == void 0 ){
-var inexlim = form.inexli01[i].value + "\:";
-} else {
-var inexlim = inexlim + form.inexli01[i].value + "\:";
-}
-}
-}
-if ( inexlim == void 0 ){
-var inexlim = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:";
-}
-var inexli01 = inexlim.substr( 0 , inexlim.length - 1 );
+
+funcinexli();
+
 var subf01 = form.subf01.checked;
 
 var i = 0;
@@ -758,6 +763,7 @@ f.Close();
 
 window.onload = function() {
 firstread();
+funcinexli();
 FoldermodeChanging();
 scaleautoChanging();
 modeselect();
@@ -777,7 +783,27 @@ window.onbeforeunload = function(){
 SettingOutput();
 }
 
+function funcinexli(){
+var form = document.SettingForm;
+var inexlim;
+for ( i=0; i < form.inexli01.length; i++ ){
+if ( form.inexli01[i].checked ){
+if ( inexlim == void 0 ){
+var inexlim = form.inexli01[i].value + "\:";
+} else {
+var inexlim = inexlim + form.inexli01[i].value + "\:";
+}
+}
+}
+if ( inexlim == void 0 ){
+var inexlim = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:gif\:mp4\:avi\:wmv";
+}
+inexli01 = inexlim.substr( 0 , inexlim.length - 1 );
 
+var AcceptText="\." + inexli01.replace( /:/gi , "\,\." );
+
+document.getElementById( "inputfilehtml" ).innerHTML = '<input type="file" name="input_file" id="input_file" accept="' + AcceptText + '" style="font-size:16pt;width:80%;clear:both;display:block;position:fixed;height:50px;bottom:0px;" multiple>';
+}
 
 function ddObj::OLEDragDrop(Data,e){ 
 
@@ -825,6 +851,44 @@ wsh.Exec( execcommand );
 //alert( execcommand );
 }
 }
+
+function StartButton(){
+var s = "\ ";
+if ( document.InputForm.input_file.value == "" ) {
+return;
+}
+var source = document.InputForm.input_file.value.replace( / /gi , "" ).split( "," );
+var fs = new ActiveXObject( "Scripting.FileSystemObject" );
+alert( source[0] );
+var FileShort = fs.GetFile( source[0] ).ShortPath;
+var TheFiles  = FileShort + s;
+
+for( i=1; i<source.length; i++){
+var FileShort = fs.GetFile( source[i] ).ShortPath;
+var TheFiles  = TheFiles + s + FileShort;
+}
+alert( TheFiles );
+var myCD        = fs.GetFolder(".").ShortPath;
+var myBat       = myCD + "\\script\\waifu2x-front_end.bat";
+var myBatShort  = fs.GetFile( myBat ).ShortPath;
+var outsetting  = myCD + "\\script\\setting.ini";
+var outsetShort = fs.GetFile( outsetting ).ShortPath;
+try{
+var sysFolder   = fs.GetFolder( "C:\\Windows\\Sysnative" );
+//alert(sysFolder);
+}catch(e){
+var sysFolder   = fs.GetFolder( "C:\\Windows\\System32" );
+}
+
+SettingOutput();
+
+var wsh = new ActiveXObject( "WScript.Shell" );
+var execcommand = sysFolder + '\\cmd.exe \/C start ' + myBatShort + s + outsetShort + s + TheFiles;
+wsh.Exec( execcommand );
+//alert( execcommand );
+
+}
+
 
 --></script>
 
