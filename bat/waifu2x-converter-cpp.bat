@@ -93,7 +93,7 @@ set noise_level01=2
 :変換する拡張子[-l --input_extention_list]
 :
 
-set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga:mp4
+set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga:gif:mp4:wmv:avi
 
 : 区切り文字は " : "(コロン)。最後にはつけない
 : 大文字小文字区別なし
@@ -781,6 +781,7 @@ goto end
 
 :animation
 set number=0
+if /I "%~x1" == ".gif" (
 for /f "delims=" %%a in ( 'identify "%~1"' ) do (
 set /A "number = number + 1"
 )
@@ -790,7 +791,6 @@ set animation=true
 set animation=false
 exit /b
 )
-if /I "%~x1" == ".gif" (
 echo アニメーションGIFを入力しました。画像枚数が多いと処理に時間がかかりますが、よろしいですか？
 echo !TIME! 操作がなければ1分後に開始します...
 set anmMode=GIF
@@ -799,6 +799,7 @@ set GifFlag=true
 echo 動画ファイルを入力しました。フレーム数が多いと処理に時間がかかりますが、よろしいですか？
 echo !TIME! 操作がなければ1分後に開始します...
 set anmMode=MOV
+set animation=true
 )
 Choice /T 60 /D Y /N /M "Y:すぐ続ける N:やめる"
 if errorlevel 2 (
@@ -810,7 +811,6 @@ echo.
 echo. >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します... >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~1"の変換を開始します...
-
 set stopandnext=false
 if "%folderoutmode%" == "0" (
 set outfolder=%~dp1
@@ -825,6 +825,13 @@ set exte02=%exte%
 set exte=%~x1
 call :namer "%~1"
 set exte=!exte02!
+set TMP_ANM=%TMP%\%~n1-anm
+set wfd_folder=%TMP%\%~n1-anm-waifued
+set Serialed_Picture=!TMP_ANM!\%~n1
+mkdir "!TMP_ANM!" > NUL 2>&1
+mkdir "!wfd_folder!" > NUL 2>&1
+
+
 if /I "%~x1" == ".gif" (
 for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
 set FPS=%%t
@@ -834,6 +841,7 @@ set transparent_txt=%TMP%\w2xtp.txt
 type NUL > "!identify_txt!"
 type NUL > "!transparent_txt!"
 identify -verbose "%~1" > "!identify_txt!" 2>&1
+convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
 CScript "%batdp%\script\extract-transparent.js" "!identify_txt!" "!transparent_txt!" > NUL 2>&1
 set /P transparent= < "!transparent_txt!"
 type NUL > "!identify_txt!"
@@ -843,24 +851,23 @@ set ffmpeg_txt=%TMP%\w2xffmpeg.txt
 set fps_txt=%TMP%\w2xfps.txt
 type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
-ffmpeg -i "%~1" > "!ffmpeg_txt!" 2>&1
+ffmpeg -i "%~1" -f image2 -vcodec png "!Serialed_Picture!-%%012d.png" > "!ffmpeg_txt!" 2>&1
 CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!" > NUL 2>&1
 set /P FPS= < "!fps_txt!"
 type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
+set number=0
+for /F "delims=" %%a in ( 'dir /B "!TMP_ANM!\*.png"' ) do (
+set /A "number = number + 1"
 )
-set TMP_ANM=%TMP%\%~n1-anm
-set wfd_folder=%TMP%\%~n1-anm-waifued
-set Serialed_Picture=!TMP_ANM!\%~n1
-mkdir "!TMP_ANM!" > NUL 2>&1
-mkdir "!wfd_folder!" > NUL 2>&1
-
-convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
+)
 
 setlocal
 set outfolder=!wfd_folder!
 set twittermode=false
-set /A "number=number - 1"
+if "!anmMode!" == "GIF" (
+set /A "number = number - 1"
+)
 :anm_loop
 if !number! LEQ 9 (
 set renban=00000000000!number!
@@ -907,10 +914,13 @@ goto anm_end_for
 call :command_w2x "!Serialed_Picture!-!renban!.png"
 :anm_end_for
 set /A "number = number - 1"
+if "!anmMode!" == "GIF" (
 if !number! GEQ 0 goto anm_loop
+) else (
+if !number! GEQ 1 goto anm_loop
+)
 set allis=true
 endlocal
-
 
 if "!anmMode!" == "GIF" (
 convert -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
@@ -1163,8 +1173,8 @@ echo !DATE! !TIME! "!FilePath!"の変換を開始します...
 call :dow2x "!PngFilePath!"
 call :shimatsu "!FilePath!"
 
-shift
 :nextforex
+shift
 if "%~1" == "" goto Finish_w2x
 goto shiwake
 
