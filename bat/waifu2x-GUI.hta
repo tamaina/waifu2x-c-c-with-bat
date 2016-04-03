@@ -2,6 +2,7 @@
 <html><head>
 <meta http-equiv="x-ua-compatible" content="IE=10">
 <hta:application id="HtaObj" icon="waifu2x.ico" SINGLEINSTANCE="yes" sysmenu="none" aplicationname="waifu2x-GUI"/>
+<script src="./js/jquery-1.12.2.min.js"></script>
 <style>
 body         {
               color:#FFFFFF;
@@ -14,6 +15,7 @@ body         {
               scrollbar-base-color:#171b1f;
               scrollbar-track-color:#343638;
               scrollbar-arrow-color:#FFFFFF;
+              text-shadow: 1px 1px 2px #556;
              }
 input        {
               font-weight:bold,medium,normal;
@@ -29,8 +31,8 @@ select       {
 h1           {
               font-family:"Segoe UI","Yu Gothic","Gen Shin Gothic","Gen Ei Gothic","Meiryo",sans-serif;
               font-weight:900;
-              color: #000;
-              text-shadow:0px -0.5px 5px #fff,0px 0px 5px #fff,0px -0.5px 5px #fff,0px 0px 5px #fff,0px -0.5px 5px #fff;
+              color: #FFF;
+              text-shadow:0px 0px 10px #000;
               margin-left:5px;
               font-size:36pt;
              }
@@ -51,7 +53,7 @@ legend       {
               width:100px;
               background-color:#171b1f;
               border:solid 1px #484b4f;
-              font-weight:normal;
+              font-weight:bold;
               padding-left:30px;
               padding-right:30px;
               padding-top:6px;
@@ -76,17 +78,71 @@ p            {
               width:49%;
               margin-right:1px;
              }
-Button       {
+Button.normal       {
+              border-radius:3px;
               font-weight:medium;
               font-family:"Meiryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
               background:#7690a3;
-              border-top:1px solid #DDD;
-              border-left:1px solid #DDD;
-              border-right:1px solid #BBB;
-              border-bottom:1px solid #BBB;
+              border-top:1px solid #87a1b4;
+              border-left:1px solid #87a1b4;
+              border-right:1px solid #657f92;
+              border-bottom:1px solid #657f92;
               color:#FFFFFF;
-              width: 50%;
+              width:calc(50% - 10px);
+              height:35px;
               text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+              box-shadow:0px 0px 6px 2px #a9c3d6;
+              margin:2px 4px;
+              }
+Button.start       {
+              border-radius:7px;
+              font-weight:medium;
+              font-family:"Meiryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+              color:#FFFFFF;
+              text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+              border:solid 3px #770000;
+              font-size:16pt;
+              clear:both;
+              display:block;
+              position:fixed;
+              width:20%;
+              margin: 0px 0px 0px 80%;
+              height:50px;
+              background-color:#FF0000;
+              bottom:0px;
+              }
+Button.sanshoin       {
+              border-radius:7px;
+              font-weight:medium;
+              font-family:"Meiryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+              color:#FFFFFF;
+              text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+              border:solid 3px #007700;
+              font-size:16pt;
+              clear:both;
+              display:block;
+              position:fixed;
+              width:20%;
+              margin: 0px 0px 0px 60%;
+              height:50px;
+              background-color:#00FF00;
+              bottom:0px;
+              }
+Button.filefolder       {
+              border-radius:3px;
+              font-weight:medium;
+              font-family:"Meiryo","Gen Shin Gothic","Gen Ei Gothic",sans-serif;
+              background:#7690a3;
+              border-top:1px solid #87a1b4;
+              border-left:1px solid #87a1b4;
+              border-right:1px solid #657f92;
+              border-bottom:1px solid #657f92;
+              color:#FFFFFF;
+              text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+              box-shadow:0px 0px 6px 2px #a9c3d6;
+              width:46px;
+              height:30px;
+              margin:0px;
               }
 div          {
               margin:0px;
@@ -151,6 +207,13 @@ document.getElementById( splited[9] ).checked         = true;
 form.folderoutmode[ splited[10] ].checked                = true;
 form.outfoldernameset.value                            = splited[11];
 form.compformat.value                                  = splited[12];
+var endwav = splited[13];
+if ( endwav == "none" ) {
+form.alarm_switch.checked = false;
+} else {
+form.alarm_switch.checked = true;
+form.alarmfile_fake_input_file.value = endwav.substr( 1 , splited[13].length - 2 ).replace( /△/gi ," " );
+}
 if ( splited[14] == "true" ) {
 form.twittermode.checked = true;
 } else {
@@ -165,12 +228,30 @@ form.OutputExtension.value                             = splited[16];
 if ( splited[16] == "false" ) {
 form.OutputExtension.value = "" ;
 }
-form.otheropca01.value                                 = splited[18].replace( /\"/g , "" ).replace( "△" ," " );
-form.otheropco01.value                                 = splited[19].replace( /\"/g , "" ).replace( "△" ," " );
-form.otheropsz01.value                                 = splited[20].replace( /\"/g , "" ).replace( "△" ," " );
-form.otheropff01.value                                 = splited[21].replace( /\"/g , "" ).replace( "△" ," " );
-window.resizeTo( splited[22],splited[23] );
-window.moveTo( splited[24],splited[25] );
+var ICCProf = splited[17];
+if ( ICCProf == "none" ) {
+form.icc_switch.checked = false;
+} else {
+form.icc_switch.checked = true;
+form.IccProf_fake_input_file.value = ICCProf.substr( 1 , splited[17].length - 2 ).replace( /△/gi ," " );
+}
+form.otheropca01.value                                 = splited[18].substr( 1 , splited[18].length - 2 ).replace( /△/gi ," " );
+form.otheropco01.value                                 = splited[19].substr( 1 , splited[19].length - 2 ).replace( /△/gi ," " );
+form.otheropsz01.value                                 = splited[20].substr( 1 , splited[20].length - 2 ).replace( /△/gi ," " );
+form.otheropff01.value                                 = splited[21].substr( 1 , splited[21].length - 2 ).replace( /△/gi ," " );
+
+if ( splited[22] == "a" ) {
+form.TMPFolderMode[0].checked                = true;
+} else if ( splited[22] == "b" ) {
+form.TMPFolderMode[1].checked                = true;
+} else if ( splited[22] == "c" ) {
+form.TMPFolderMode[2].checked                = true;
+}
+form.TMPfoldernameset.value                  = splited[23].substr( 1 , splited[23].length - 2 ).replace( /△/gi ," " );
+form.outfolderbyFullpath.value               = splited[24].substr( 1 , splited[24].length - 2 ).replace( /△/gi ," " );
+
+window.resizeTo( splited[25],splited[26] );
+window.moveTo( splited[27],splited[28] );
 }
 --></script>
 <title>waifu2x GUI</title>
@@ -180,8 +261,12 @@ window.moveTo( splited[24],splited[25] );
 
 <body>
 
-
-<h1>waifu2x GUI</h1>
+<div style="clear:both;display:block;position:fixed;background-color:rgba(238,238,234,0.75);margin-left:-7%;width:100%;box-shadow:0px 0px 6px 2px #EEEEEA;height:33px;">
+<h1 style="margin:0px;padding-left:7%;">waifu2x GUI</h1>
+</div>
+<div style="padding-top:57px;">
+<p> </p>
+</div>
 <form name="SettingForm" id="SettingForm">
 
 <!--
@@ -273,7 +358,7 @@ window.moveTo( splited[24],splited[25] );
 <div name="left_content" class="left_content">
 <fieldset>
 <legend>変換する画像の拡張子</legend>
-<button type="button" onclick="allcheck(inexli01);" >全選択</button><button type="button" onclick="alldisable(inexli01);" >全解除</button>
+<button type="button" onclick="allcheck('inexli01');" class="normal">全選択</button><button type="button" onclick="alldisable('inexli01');" class="normal">全解除</button>
 <table><tbody>
 <tr><td>
 <label><input type="checkbox" name="inexli01" value="jpg" id="jpg" checked="checked" onchange="funcinexli();">jpg</label></td><td>
@@ -303,7 +388,7 @@ window.moveTo( splited[24],splited[25] );
 <!--<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked" onchange="funcinexli();">avi</label>-->
 </td></tr>
 </tbody></table>
-<p>※動画の音声の合成は現バージョンでは対応していません。別途EcoDecoToolとAviutlで行ってください。</p>
+<p style="font-size:10pt">※動画の音声の合成は現バージョンでは対応していません。別途EcoDecoToolとAviutlで行ってください。</p>
 </fieldset>
 </div>
 
@@ -329,9 +414,15 @@ window.moveTo( splited[24],splited[25] );
 <legend>終了時の処理</legend>
 
 <p><label><input type="checkbox" name="alarm_switch" id="alarm_switch" onchange="alarmchange();">終了時に音を鳴らす</label></p>
-<label><input type="file" name="alarmfile" id="alarmfile" accept="audio/wav" style="width:100%;"></label></p>
+<!-- http://qiita.com/shimayu/items/605ecac3eeec50dd4f93 -->
+<p><input type="file" name="alarmfile" id="alarmfile" accept="audio/wav" style=display:none;" onchange="$('#alarmfile_fake_input_file').val($(this).val())">
+<input id="alarmfile_fake_input_file" name="alarmfile_fake_input_file" type="text" value="" onClick="$('#alarmfile').click();" readonly="readonly" style="width:calc(100% - 58px);">
+<button type="button" id="alarmfile_Button" name="alarmfile_Button" onClick="$('#alarmfile').click();" class="filefolder">参照</button>
+</p>
 <p><label><input type="checkbox" name="icc_switch" id="icc_switch" onchange="iccchange();">ICCプロファイルを付与する</label></p>
-<label><input type="file" name="IccProf" id="IccProf" accept=".icc" style="width:100%;"></label></p>
+<p><input type="file" name="IccProf" id="IccProf" accept=".icc" style=display:none;" onchange="$('#IccProf_fake_input_file').val($(this).val())">
+<input id="IccProf_fake_input_file" name="IccProf_fake_input_file" type="text" value="" onClick="$('#IccProf').click();" readonly="readonly" style="width:calc(100% - 58px);">
+<button type="button" id="IccProf_Button" name="IccProf_Button" onClick="$('#IccProf').click();" class="filefolder">参照</button>
 
 <p><label><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</label></p>
 <p><label><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</label></p>
@@ -346,13 +437,18 @@ window.moveTo( splited[24],splited[25] );
 <p>
 <label><input type="radio" name="folderoutmode" value="0" id="0" onchange="FoldermodeChanging();">入力フォルダと同じフォルダ</label>
 </p><p>
-<label><input type="radio" name="folderoutmode" value="1" id="1" onchange="FoldermodeChanging();">フォルダに出力(分割する)</label>
+<label><input type="radio" name="folderoutmode" value="1" id="1" onchange="FoldermodeChanging();">下層フォルダ(各々)</label>
 </p><p>
-<label><input type="radio" name="folderoutmode" value="2" id="2" onchange="FoldermodeChanging();" checked="checked">フォルダに出力(一括する)</label>
+<label><input type="radio" name="folderoutmode" value="2" id="2" onchange="FoldermodeChanging();" checked="checked">下層フォルダ(一括)</label>
 </p><p>
-<label><input type="radio" name="folderoutmode" value="3" id="3" onchange="FoldermodeChanging();">圧縮フォルダに出力</label>
+<label><input type="radio" name="folderoutmode" value="3" id="3" onchange="FoldermodeChanging();">圧縮フォルダ</label>
+</p><p>
+<label><input type="radio" name="folderoutmode" value="4" id="4" onchange="FoldermodeChanging();">パスを指定する</label>
 </p>
-<table><tbody><tr><th>
+<p><input type="text" name="outfolderbyFullpath" id="outfolderbyFullpath" style="width:calc(100% - 58px);" onClick="$('#outfolderbyFullPath_Button').click();" readonly="readonly">
+<button type="button" id="outfolderbyFullPath_Button" name="outfolderbyFullPath_Button" class="filefolder" onclick="Path = WSHFolder( '' );if(Path){document.SettingForm.outfolderbyFullpath.value = Path}">参照</button></p>
+<hr style="border:solid 0.5px #494b4f;">
+<table><tbody><tr><th style="width:50%">
 <label id="outfolder" for="outfoldernameset">出力フォルダ名：</label></th><td><input type="text" name="outfoldernameset" id="outfoldernameset" value="waifued" style="width:70px">
 </td></tr><tr><th>
 <label id="outzip" for="compformat">圧縮形式：</label></th><td><select name="compformat" id="compformat" style="width:70px">
@@ -380,8 +476,23 @@ window.moveTo( splited[24],splited[25] );
 </fieldset>
 </div>
 <div style="clear:both;">
+<fieldset>
+<legend>作業フォルダ</legend>
+<p>
+<label><input type="radio" name="TMPFolderMode" value="a" id="a" onchange="TMPChanging();" checked="checked">システム標準(%TMP%)</label>
+</p><p>
+<label><input type="radio" name="TMPFolderMode" value="b" id="b" onchange="TMPChanging();">出力フォルダと同じ</label>
+</p><p>
+<label><input type="radio" name="TMPFolderMode" value="c" id="c" onchange="TMPChanging();">指定する</label>
+</p><p><input type="text" name="TMPfoldernameset" id="TMPfoldernameset" style="width:calc(100% - 58px);" onClick="$('#TMPfoldernameset_Button').click();" readonly="readonly">
+<button type="button" id="TMPfoldernameset_Button" name="TMPfoldernameset_Button" onclick="Path = WSHFolder( '' );if(Path){document.SettingForm.TMPfoldernameset.value = Path}" class="filefolder">参照</button>
+</p>
+
+</fieldset>
+</div>
+<div style="clear:both;">
 <p>参考……</p>
-<p>システム音のフォルダは C:\Windows\Media です。<br>iccの場所はC:\Windows\System32\spool\drivers\colorです。<br>HTAとIEの仕様により、次回起動時にファイル名は保持されません。</p>
+<p>システム音のフォルダは C:\Windows\Media です。<br>ICCプロファイルのフォルダはC:\Windows\System32\spool\drivers\colorです。</p>
 <p></p>
 <p>透過情報付きアニメーションGIFはalpha情報をバッチファイルで処理します。</p>
 </div>
@@ -392,21 +503,20 @@ window.moveTo( splited[24],splited[25] );
 <param name='Style' value='1'>
 <param name='Simpletext' value='ここにファイルをドラッグアンドドロップすると変換が始まります。'>
 </object>
-<div style="clear:both;display:block;position:fixed;bottom:50px;height:21px;margin-left:-7%;background-color:#CCCCCC;width:100%;border-top:solid 1px #000000;padding:0;color:black;">
-<p style="margin:0;padding:0;font-size:11pt;">下の[参照]でファイルを選択し、[変換開始]を押すと変換を開始します。</p>
+<div style="clear:both;display:block;position:fixed;bottom:50px;height:21px;margin-left:-7%;background-color:rgba(0,0,0,0.85);width:100%;border-top:solid 1px #000000;padding:0;">
+<p style="margin:0;padding:0;font-size:11pt;color:white;">下の[参照]でファイルを選択してください。[変換開始]を押すと変換を開始します。</p>
 </div>
 <form name="InputForm" id="InputForm">
-<div style="clear:both;display:block;position:fixed;bottom:0px;height:50px;margin-left:-7%;background-color:#000000;width:100%;">
-<span id="inputfilehtml"></span>
-<button type="button" onclick="StartButton();" style="border:solid 1px #AA0000;font-size:16pt;clear:both;display:block;position:fixed;width:20%;margin-left:80%;height:50px;background-color:#FF0000;bottom:0px">変換開始</button>
+<div style="clear:both;display:block;position:fixed;bottom:0px;height:50px;margin-left:-7%;background-color:rgba(0,0,0,0.85);width:100%;">
+<span id="inputfilehtml" onload="funcinexli();"></span>
+<input id="input_file_fake_input_file" name="input_file_fake_input_file" type="text" value="" onClick="$('#input_file').click();" readonly="readonly" style="width:calc( 60% - 10px );height:40px;margin:2px">
+<button type="button" id="input_file_Button" name="input_file_Button" onClick="$('#input_file').click();" class="sanshoin">参照</button>
+<button type="button" id="StartButton" name="StartButton" class="start">変換開始</button>
 </div>
 </form>
 
-<div style="padding-top:13vh;">
+<div style="padding-top:calc( 13vh + 50px );">
 <p>waifu2x</p>
-</div>
-<div style="padding-top:71spx;">
-<p>GUI</p>
 </div>
 
 <script type='text/JavaScript'><!--
@@ -460,14 +570,26 @@ var setwidth = fieldsets[i].clientWidth -60;
 legends[i].style.width = setwidth + "px" ;
 }
 }
-
+if ( thewidth > 560 ) {
+document.InputForm.input_file_Button.style.fontSize = "16pt";
+document.InputForm.StartButton.style.fontSize = "16pt";
+} else if ( thewidth > 480 ) {
+document.InputForm.input_file_Button.style.fontSize = "13pt";
+document.InputForm.StartButton.style.fontSize = "13pt";
+} else if ( thewidth > 410 ) {
+document.InputForm.input_file_Button.style.fontSize = "10pt";
+document.InputForm.StartButton.style.fontSize = "10pt";
+} else {
+document.InputForm.input_file_Button.style.fontSize = "8pt";
+document.InputForm.StartButton.style.fontSize = "8pt";
+}
 }
 
 var scaleauto_chkbox       = document.SettingForm.scaleauto_check;
 var scaleauto_height       = document.SettingForm.scaleauto_height;
 var scaleauto_width        = document.SettingForm.scaleauto_width;
 var scale_ratio01          = document.SettingForm.scale_ratio01;
-var noiselevelbar          = document.SettingForm.noise_level01
+var noiselevelbar          = document.SettingForm.noise_level01;
 
 function scaleautoChanging(){
 
@@ -486,6 +608,46 @@ scale_ratio01.disabled     = false;
 document.getElementById("scaleAutoObj").style.color = "#8899a6";
 document.getElementById("scaleRatioObj").style.color = "#FFFFFF";
 }
+}
+
+function WSHFolder( initPath ){
+//  http://3rd.geocities.jp/kaito_extra/Source/FileFolderCtrl.html#LINK8
+//  
+//  情報の入力方法
+//  
+//  　フォルダ選択ダイアログボックスを表示する。
+//  
+
+//  フォルダ選択ダイアログボックスのオプション
+var BIF_NON                 =   0;  // 全てのオプションがない状態
+var BIF_EDITBOX             =  16;  // フォルダ名を指定するテキストボックスを表示
+var BIF_NONEWFOLDERBUTTON   = 512;  // 新しいフォルダボタンを非表示にする
+
+//  Shell関連の操作を提供するオブジェクトその2を取得
+var sh = new ActiveXObject( "Shell.Application" );
+
+//  親ウインドウのハンドルを設定(基本的にこれは初期値「0」)
+var hWnd = 0;
+
+//  ダイアログボックスに表示するタイトルを設定
+var title = "フォルダを選択";
+
+//  オプションを設定
+var op = 16;
+
+//  初期表示のディレクトリパスを設定
+
+//  フォルダ選択ダイアログボックスを表示
+var folder = sh.BrowseForFolder( hWnd, title, op, initPath );
+
+//  キャンセルボタンを押されたとき
+if ( folder  ==  null ) {
+    return "";
+} else {
+    return folder.Items().Item().Path ;
+}
+//  オブジェクトを解放
+sh = null;
 }
 
 function noiselevelhoge(){
@@ -517,8 +679,8 @@ document.getElementById("F_scale_setting").style.color = "#FFFFFF";
 scaleautoChanging();
 document.getElementById("F_noise_setting").style.color = "#FFFFFF";
 }
-function modeselect03(){
 
+function modeselect03(){
 scaleauto_chkbox.disabled  = true;
 scaleauto_height.disabled  = true;
 scaleauto_width.disabled  = true;
@@ -529,20 +691,24 @@ document.getElementById("scaleAutoObj").style.color = "#8899a6";
 document.getElementById("scaleRatioObj").style.color = "#8899a6";
 document.getElementById("F_noise_setting").style.color = "#FFFFFF";
 }
-function modeselect04(){
 
+function modeselect04(){
 scaleauto_chkbox.disabled  = false;
 scaleauto_height.disabled  = false;
 scaleauto_width.disabled  = false;
 scale_ratio01.disabled  = false;
 noiselevelbar.disabled  = true;
-
 document.getElementById("F_scale_setting").style.color = "#FFFFFF";
 scaleautoChanging();
 document.getElementById("F_noise_setting").style.color = "#8899a6";
 }
 
 function modeselect(){
+var scaleauto_chkbox       = document.SettingForm.scaleauto_check;
+var scaleauto_height       = document.SettingForm.scaleauto_height;
+var scaleauto_width        = document.SettingForm.scaleauto_width;
+var scale_ratio01          = document.SettingForm.scale_ratio01;
+var noiselevelbar          = document.SettingForm.noise_level01;
 if ( form.mode01[0].checked ){
 modeselect01();
 } else if ( form.mode01[1].checked ){
@@ -553,11 +719,13 @@ modeselect04();
 modeselect03();
 }
 }
+
 function allcheck(){
 for (i=0; i<document.SettingForm.inexli01.length; i++){
     document.SettingForm.inexli01[i].checked = true;
 }
 }
+
 function alldisable(){
 for (i=0; i<document.SettingForm.inexli01.length; i++){
     document.SettingForm.inexli01[i].checked = false;
@@ -590,28 +758,66 @@ var folderoutmode = form.folderoutmode[i].value;
 i++;
 } while( folderoutmodetf == false );
 if ( folderoutmode == 0 ){
-folderdisable();compressdisable();
+folderable();compressdisable();
+document.getElementById("outfolderbyFullpath").disabled = true;
+document.getElementById("outfolderbyFullPath_Button").disabled = true;
 } else if ( folderoutmode == 1 ){
 folderable();compressdisable();
+document.getElementById("outfolderbyFullpath").disabled = true;
+document.getElementById("outfolderbyFullPath_Button").disabled = true;
 } else if ( folderoutmode == 2 ){
 folderable();compressdisable();
+document.getElementById("outfolderbyFullpath").disabled = true;
+document.getElementById("outfolderbyFullPath_Button").disabled = true;
 } else if ( folderoutmode == 3 ){
 folderable();compressable();
+document.getElementById("outfolderbyFullpath").disabled = true;
+document.getElementById("outfolderbyFullPath_Button").disabled = true;
+} else if ( folderoutmode == 4 ){
+folderdisable();compressdisable();
+//document.getElementById("outfolderbyFullpath").disabled = false;
+document.getElementById("outfolderbyFullPath_Button").disabled = false;
+}
+}
+
+function TMPChanging(){
+var form = document.SettingForm;
+var i = 0;
+TMPfoldernameset = '"' + form.TMPfoldernameset.value.replace( /\ /g , "△" ) + '"';
+do {
+var TMPFolderf = form.TMPFolderMode[i].checked;
+TMPFolder = form.TMPFolderMode[i].value
+i++;
+} while( TMPFolderf == false );
+if ( TMPFolder == "a" ){
+form.TMPfoldernameset.disabled = true;
+form.TMPfoldernameset_Button.disabled = true;
+} else if ( TMPFolder == "b" ){
+form.TMPfoldernameset.disabled = true;
+form.TMPfoldernameset_Button.disabled = true;
+} else if ( TMPFolder == "c" ){
+form.TMPfoldernameset.disabled = false;
+form.TMPfoldernameset_Button.disabled = false;
 }
 }
 
 function alarmchange(){
 if ( document.SettingForm.alarm_switch.checked ){
-    document.SettingForm.alarmfile.disabled = false;
+    document.SettingForm.alarmfile_fake_input_file.disabled = false;
+    document.getElementById("alarmfile_Button").disabled = false;
 } else {
-    document.SettingForm.alarmfile.disabled = true;
+    document.SettingForm.alarmfile_fake_input_file.disabled = true;
+document.getElementById("alarmfile_Button").disabled = true;
+
 }
 }
 function iccchange(){
 if ( document.SettingForm.icc_switch.checked ){
-    document.SettingForm.IccProf.disabled = false;
+    document.SettingForm.IccProf_fake_input_file.disabled = false;
+document.getElementById("IccProf_Button").disabled = false;
 } else {
-    document.SettingForm.IccProf.disabled = true;
+    document.SettingForm.IccProf_fake_input_file.disabled = true;
+document.getElementById("IccProf_Button").disabled = true;
 }
 }
 function extechange(){
@@ -636,8 +842,27 @@ if ( document.SettingForm.usewaifu_autoswitch.checked ){
 }
 }
 
+function funcinexli(){
+var form = document.SettingForm;
+var inexlim;
+for ( i=0; i < form.inexli01.length; i++ ){
+if ( form.inexli01[i].checked ){
+if ( inexlim == void 0 ){
+var inexlim = form.inexli01[i].value + "\:";
+} else {
+var inexlim = inexlim + form.inexli01[i].value + "\:";
+}
+}
+}
+if ( inexlim == void 0 ){
+var inexlim = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:gif\:mp4\:avi\:wmv";
+}
+inexli01 = inexlim.substr( 0 , inexlim.length - 1 );
 
-
+var AcceptText="\." + inexli01.replace( /:/gi , "\,\." );
+//.icc
+document.getElementById( "inputfilehtml" ).innerHTML = '<input type="file" name="input_file" id="input_file" accept="' + AcceptText + '" style=display:none;" onchange="$(\'\#input_file_fake_input_file\')\.val($(this)\.val())\;" multiple>';
+}
 
 function SettingOutput(){
 
@@ -687,6 +912,8 @@ var model01 = form.model01.value;
 
 funcinexli();
 
+TMPChanging();
+
 var subf01 = form.subf01.checked;
 
 var i = 0;
@@ -699,10 +926,11 @@ var outfoldernameset = form.outfoldernameset.value;
 var compformat = form.compformat.value;
 var twittermode = form.twittermode.checked;
 var alphaswitch = form.alphaswitch.checked;
-var otheropca01 = '\"' + form.otheropca01.value.replace( / /g , "△" ) + '\"';
-var otheropco01 = '\"' + form.otheropco01.value.replace( / /g , "△" ) + '\"';
-var otheropsz01 = '\"' + form.otheropsz01.value.replace( / /g , "△" ) + '\"';
-var otheropff01 = '\"' + form.otheropff01.value.replace( / /g , "△" ) + '\"';
+var otheropca01 = '\"' + form.otheropca01.value.replace( /\ /g , "△" ) + '\"';
+var otheropco01 = '\"' + form.otheropco01.value.replace( /\ /g , "△" ) + '\"';
+var otheropsz01 = '\"' + form.otheropsz01.value.replace( /\ /g , "△" ) + '\"';
+var otheropff01 = '\"' + form.otheropff01.value.replace( /\ /g , "△" ) + '\"';
+var outfolderbyFullpath = '\"' + form.outfolderbyFullpath.value.replace( /\ /g , "△" ) + '\"';
 if ( otheropca01 == "" ){
 var otheropca01 = '\"' + "none" + '\"';
 }
@@ -717,7 +945,7 @@ if ( form.alarm_switch.checked ){
 if ( form.alarmfile.value == "" ){
 var endwav = "none";
 } else {
-var endwav = '\"' + form.alarmfile.value.replace( /\ /g , "△" ) + '\"';
+var endwav = '\"' + form.alarmfile_fake_input_file.value.replace( /\ /g , "△" ) + '\"';
 }
 } else {
 var endwav = "none";
@@ -726,7 +954,7 @@ if ( form.icc_switch.checked ){
 if ( form.IccProf.value == "" ){
 var IccProf = "none";
 } else {
-var IccProf = '\"' + form.IccProf.value.replace( /\ /g , "△" ) + '\"';
+var IccProf = '\"' + form.IccProf_fake_input_file.value.replace( /\ /g , "△" ) + '\"';
 }
 } else {
 var IccProf = "none";
@@ -740,7 +968,7 @@ var OutputExtension = form.OutputExtension.value;
 } else {
 var OutputExtension = "false";
 }
-var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
+var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + TMPFolder + s + TMPfoldernameset + s + outfolderbyFullpath + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
 
 
 // 参考→ http://sei.qee.jp/docs/program/hta/location/href.html
@@ -764,12 +992,11 @@ f.Close();
 window.onload = function() {
 firstread();
 funcinexli();
+TMPChanging();
 FoldermodeChanging();
 scaleautoChanging();
 modeselect();
 noiselevelrange();
-folderable();
-compressdisable();
 w2xautochange();
 alarmchange();
 iccchange();
@@ -782,27 +1009,8 @@ windowresize();
 window.onbeforeunload = function(){
 SettingOutput();
 }
-
-function funcinexli(){
-var form = document.SettingForm;
-var inexlim;
-for ( i=0; i < form.inexli01.length; i++ ){
-if ( form.inexli01[i].checked ){
-if ( inexlim == void 0 ){
-var inexlim = form.inexli01[i].value + "\:";
-} else {
-var inexlim = inexlim + form.inexli01[i].value + "\:";
-}
-}
-}
-if ( inexlim == void 0 ){
-var inexlim = "png\:jpg\:jpeg\:tif\:tiff\:bmp\:tga\:gif\:mp4\:avi\:wmv";
-}
-inexli01 = inexlim.substr( 0 , inexlim.length - 1 );
-
-var AcceptText="\." + inexli01.replace( /:/gi , "\,\." );
-
-document.getElementById( "inputfilehtml" ).innerHTML = '<input type="file" name="input_file" id="input_file" accept="' + AcceptText + '" style="font-size:16pt;width:80%;clear:both;display:block;position:fixed;height:50px;bottom:0px;" multiple>';
+document.InputForm.StartButton.onclick = function(){
+StartButton();
 }
 
 function ddObj::OLEDragDrop(Data,e){ 
@@ -853,19 +1061,30 @@ wsh.Exec( execcommand );
 }
 
 function StartButton(){
+
+SettingOutput();
+
 var s = "\ ";
-if ( document.InputForm.input_file.value == "" ) {
-return;
+if ( document.InputForm.input_file_fake_input_file.value == "" ) {
+return ;
 }
-var source = document.InputForm.input_file.value.replace( / /gi , "" ).split( "," );
+try{
+var source = document.InputForm.input_file_fake_input_file.value.split( ", " );
 var fs = new ActiveXObject( "Scripting.FileSystemObject" );
-alert( source[0] );
-var FileShort = fs.GetFile( source[0] ).ShortPath;
+var FileShort = '"' + fs.GetFile( source[0] ).ShortPath + '"';
 var TheFiles  = FileShort + s;
 
 for( i=1; i<source.length; i++){
 var FileShort = fs.GetFile( source[i] ).ShortPath;
 var TheFiles  = TheFiles + s + FileShort;
+//alert( source[i] );
+}
+}catch(e){
+var source = document.InputForm.input_file_fake_input_file.value;
+var fs = new ActiveXObject( "Scripting.FileSystemObject" );
+var FileShort = '"' + fs.GetFile( source ).ShortPath + '"';
+var TheFiles  = FileShort;
+alert( source );
 }
 alert( TheFiles );
 var myCD        = fs.GetFolder(".").ShortPath;
@@ -880,8 +1099,6 @@ var sysFolder   = fs.GetFolder( "C:\\Windows\\Sysnative" );
 var sysFolder   = fs.GetFolder( "C:\\Windows\\System32" );
 }
 
-SettingOutput();
-
 var wsh = new ActiveXObject( "WScript.Shell" );
 var execcommand = sysFolder + '\\cmd.exe \/C start ' + myBatShort + s + outsetShort + s + TheFiles;
 wsh.Exec( execcommand );
@@ -890,7 +1107,7 @@ wsh.Exec( execcommand );
 }
 
 
---></script>
 
+--></script>
 </body>
 </html>

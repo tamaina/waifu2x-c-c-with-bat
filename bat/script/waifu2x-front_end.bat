@@ -26,7 +26,7 @@ type NUL > "%fname_txt%"
 
 set Dquarto=^"
 
-for /F "usebackq tokens=1-23" %%a in ( "%~1" ) do (
+for /F "usebackq tokens=1-26" %%a in ( "%~1" ) do (
 set mode01=%%a
 rem auto_scale
 if  "%debug_hi%" == "true" echo mode01 !mode01!
@@ -121,6 +121,16 @@ if  "%debug_hi%" == "true" echo otheropca01 !otheropca01! in %%~s
 if  "%debug_hi%" == "true" echo otheropco01 !otheropco01! in %%~t
 if  "%debug_hi%" == "true" echo otherop7z01 !otherop7z01! in %%~u
 if  "%debug_hi%" == "true" echo otherop7z01 !otherop7z01! in %%~v
+
+set TMPFolderMode=%%w
+if  "%debug_hi%" == "true" echo TMPFolderMode !TMPFolderMode!
+set TMPfoldernameset11=%%~x
+set TMPfoldernameset=!TMPfoldernameset11:△=^ !
+if  "%debug_hi%" == "true" echo TMPfoldernameset !TMPfoldernameset! in %%~x
+set outfolderbyFullpath11=%%~y
+set outfolderbyFullpath=!outfolderbyFullpath11:△=^ !
+if  "%debug_hi%" == "true" echo outfolderbyFullpath !outfolderbyFullpath! in %%~y
+
 )
 if "%otheropca11%" == "" (
  set otheropca01=
@@ -133,6 +143,12 @@ if "%otherop7z11%" == "" (
 )
 if "%otheropff11%" == "" (
  set otheropff01=
+)
+if "%TMPfoldernameset11%" == "" (
+ set TMPfoldernameset=
+)
+if "%outfolderbyFullpath11%" == "" (
+ set outfolderbyFullpath=
 )
 if  "%debug_hi%" == "true" echo %otheropco11% → %otheropco01%
 if  "%debug_hi%" == "true" echo %otheropca11% → %otheropca01%
@@ -148,7 +164,9 @@ set scale_ratio02=%scale_ratio01%
 set exte=.png
 set per=%%
 set hoge=*.%inexli01::= *.%
-
+if "%TMPFolderMode%" == "c" (
+set TMP=%TMPfoldernameset%
+)
 pushd "%~1" > NUL 2>&1
 set pushderrorlv=%ErrorLevel%
 if "%pushderrorlv%" GEQ "1" (
@@ -168,7 +186,11 @@ set outfolder=%~dp1\%outfoldernameset%
 set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
 set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1\%outfoldernameset%.%compformat%
+) else if "%folderoutmode%" == "4" (
+set outfoldercd=%outfolderbyFullpath%
+set outfolder=%outfolderbyFullpath%
 ) else (
+set outfoldercd=%~dp1\%outfoldernameset%
 set outfolder=%~dp1\%outfoldernameset%
 )
 
@@ -188,6 +210,8 @@ set outfolder=%~dp1%outfoldernameset%
 set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
 set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1%outfoldernameset%.%compformat%
+) else if "%folderoutmode%" == "4" (
+set outfolder=%outfolderbyFullpath%
 ) else (
 set outfolder=%~dp1%outfoldernameset%
 )
@@ -330,6 +354,8 @@ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 
 goto end
 
@@ -361,9 +387,9 @@ if "!jpegfile!" == "true" (
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
  exit /b
  )
@@ -374,9 +400,9 @@ if "!jpegfile!" == "true" (
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
  exit /b
 )
@@ -507,6 +533,8 @@ echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 if "%twittermode%" == "true" (
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
@@ -514,6 +542,9 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
+ 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 set allis=true
 if "%debugmode%" == "false" (
@@ -573,7 +604,9 @@ set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
 set outfolder=%~dp1\%outfoldernameset%
 )
-
+if "%TMPFolderMode%" == "b" (
+set TMP=!outfolder!
+)
 call :multiplier "%~1"
 set exte02=%exte%
 set exte=%~x1
@@ -643,6 +676,17 @@ set renban=!number!
 )
 
 set mode01nam=wfd_%~n1-!renban!.png
+if /I not "!anmMode!" == "GIF" (
+if /I not "%~x1" == ".avi" (
+if "%mode01%" == "scale" (
+set mode01var=-m scale --scale_ratio %scale_ratio01%
+) else if "%mode01%" == "noise" (
+set mode01var=-m noise --noise_level %noise_level01%
+) else (
+set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
+)
+)
+)
 if "!anmMode!" == "GIF" (
 call :alpha "!Serialed_Picture!-!renban!.png"
 goto anm_end_for
@@ -665,13 +709,15 @@ ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 Del /Q !TMP_ANM! > NUL 2>&1
 Del /Q !wfd_folder! > NUL 2>&1
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
 set allis=true
 
@@ -732,7 +778,9 @@ set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
 set outfolder=%~dp1\%outfoldernameset%
 )
-
+if "%TMPFolderMode%" == "b" (
+set TMP=!outfolder!
+)
 mkdir "!outfolder!" > NUL 2>&1
 
 call :multiplier "%~1"
@@ -750,9 +798,9 @@ if "!allis!" == "true" exit /b
 call :command_w2x "%~1"
 
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
 
 goto end
@@ -821,6 +869,9 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
+ 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 goto end
 
@@ -871,6 +922,8 @@ if "%folderoutmode%" == "2" (
 call :outfilename_a "%~1"
 ) else if "%folderoutmode%" == "3" (
 call :outfilename_a "%~1"
+) else if "%folderoutmode%" == "4" (
+call :outfilename_a "%~1"
 )
 
 call :animation "!FilePath!"
@@ -896,6 +949,8 @@ goto shiwake
 
 pushd %1
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
+echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード] >>"%logname%.log" 2>>&1
+
 set folderpath=%~1
 if "%subf01%" == "true" (
  rem サブフォルダ処理モード
@@ -909,6 +964,10 @@ if "%subf01%" == "true" (
   call :w2xf1 !filepath!
   )
  )
+echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード]
+echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード] >>"%logname%.log" 2>>&1
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 shift
 if "%~1" == "" goto Finish_w2x
 goto shiwake
@@ -931,6 +990,12 @@ call :outfilename_b "%~1" "%~3"
 call :outfilename_a "%~1"
 )
 ) else if "%folderoutmode%" == "3" (
+if "%2" == "true" (
+call :outfilename_b "%~1" "%~3"
+) else (
+call :outfilename_a "%~1"
+)
+) else if "%folderoutmode%" == "4" (
 if "%2" == "true" (
 call :outfilename_b "%~1" "%~3"
 ) else (
@@ -965,7 +1030,7 @@ call wta.bat PRINT
 if "%folderoutmode%" == "3" (
 echo !DATE! !TIME! 7-ZIPで圧縮を開始します。
 echo !DATE! !TIME! 7-ZIPで圧縮をしました。 >>"%logname%.log" 2>>&1
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
@@ -981,7 +1046,7 @@ echo !DATE! !TIME! 7-ZIPで圧縮が完了しました。
 echo "%lastzip%"
 rd /S /Q "%outfoldercd%" > NUL 2>&1
 ) else (
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
