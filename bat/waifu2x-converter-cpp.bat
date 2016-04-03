@@ -781,7 +781,7 @@ goto end
 
 :animation
 set number=0
-if /I "%~x1" == ".gif" (
+
 for /f "delims=" %%a in ( 'identify "%~1"' ) do (
 set /A "number = number + 1"
 )
@@ -791,6 +791,7 @@ set animation=true
 set animation=false
 exit /b
 )
+if /I "%~x1" == ".gif" (
 echo アニメーションGIFを入力しました。画像枚数が多いと処理に時間がかかりますが、よろしいですか？
 echo !TIME! 操作がなければ1分後に開始します...
 set anmMode=GIF
