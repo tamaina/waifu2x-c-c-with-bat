@@ -249,9 +249,13 @@ form.TMPFolderMode[2].checked                = true;
 }
 form.TMPfoldernameset.value                  = splited[23].substr( 1 , splited[23].length - 2 ).replace( /△/gi ," " );
 form.outfolderbyFullpath.value               = splited[24].substr( 1 , splited[24].length - 2 ).replace( /△/gi ," " );
-
-window.resizeTo( splited[25],splited[26] );
-window.moveTo( splited[27],splited[28] );
+if ( splited[25] == "true" ) {
+form.ToMakeMovie.checked = true;
+} else {
+form.ToMakeMovie.checked = false;
+}
+window.resizeTo( splited[26],splited[27] );
+window.moveTo( splited[28],splited[29] );
 }
 --></script>
 <title>waifu2x GUI</title>
@@ -426,6 +430,8 @@ window.moveTo( splited[27],splited[28] );
 
 <p><label><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</label></p>
 <p><label><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</label></p>
+<p><label><input type="checkbox" name="ToMakeMovie" id="ToMakeMovie" checked="checked">動画を変換した後動画に復元する</label></p>
+<p style="font-size:10pt">※上のチェックを外すと、連番pngとfpsが入ったフォルダが、出力フォルダに入ります。</p>
 
 </fieldset>
 </div>
@@ -931,6 +937,7 @@ var otheropco01 = '\"' + form.otheropco01.value.replace( /\ /g , "△" ) + '\"';
 var otheropsz01 = '\"' + form.otheropsz01.value.replace( /\ /g , "△" ) + '\"';
 var otheropff01 = '\"' + form.otheropff01.value.replace( /\ /g , "△" ) + '\"';
 var outfolderbyFullpath = '\"' + form.outfolderbyFullpath.value.replace( /\ /g , "△" ) + '\"';
+var ToMakeMovie = form.ToMakeMovie.checked;
 if ( otheropca01 == "" ){
 var otheropca01 = '\"' + "none" + '\"';
 }
@@ -968,7 +975,7 @@ var OutputExtension = form.OutputExtension.value;
 } else {
 var OutputExtension = "false";
 }
-var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + TMPFolder + s + TMPfoldernameset + s + outfolderbyFullpath + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
+var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + TMPFolder + s + TMPfoldernameset + s + outfolderbyFullpath + s + ToMakeMovie + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
 
 
 // 参考→ http://sei.qee.jp/docs/program/hta/location/href.html

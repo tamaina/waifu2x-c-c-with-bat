@@ -93,10 +93,21 @@ set noise_level01=2
 :変換する拡張子[-l --input_extention_list]
 :
 
-set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga
+set inexli01=png:jpg:jpeg:tif:tiff:bmp:tga:mp4
 
 : 区切り文字は " : "(コロン)。最後にはつけない
 : 大文字小文字区別なし
+:=============================================================
+:
+:動画を作るか、連番png出力でストップするか。
+:
+
+set ToMakeMovie=false
+
+:true  →動画を作る(お手軽モード)
+:false →連番pngを出力(上級者向け)
+:falseにすると自分なりのアップコンバート動画が作れます。
+:作られたpngはフォルダごと出力フォルダで指定したフォルダに移ります。
 :=============================================================
 :
 :出力拡張子[-e --output_extention]
@@ -907,12 +918,23 @@ echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 ) else (
+if "%ToMakeMovie%" == "true" (
 ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
+) else (
+call :noext "!outfolder!\!mode01nam!"
+xcopy "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
+echo NUL > "!NoExtPath!\!FPS!fps.txt"
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
+echo 連番画像生成先フォルダ:!NoExtPath! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
+)
 )
 Del /Q !TMP_ANM! > NUL 2>&1
 Del /Q !wfd_folder! > NUL 2>&1

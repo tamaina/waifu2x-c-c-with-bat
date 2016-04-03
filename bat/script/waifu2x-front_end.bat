@@ -26,7 +26,7 @@ type NUL > "%fname_txt%"
 
 set Dquarto=^"
 
-for /F "usebackq tokens=1-26" %%a in ( "%~1" ) do (
+for /F "usebackq tokens=1-27" %%a in ( "%~1" ) do (
 set mode01=%%a
 rem auto_scale
 if  "%debug_hi%" == "true" echo mode01 !mode01!
@@ -130,6 +130,8 @@ if  "%debug_hi%" == "true" echo TMPfoldernameset !TMPfoldernameset! in %%~x
 set outfolderbyFullpath11=%%~y
 set outfolderbyFullpath=!outfolderbyFullpath11:△=^ !
 if  "%debug_hi%" == "true" echo outfolderbyFullpath !outfolderbyFullpath! in %%~y
+set ToMakeMovie=%%z
+if  "%debug_hi%" == "true" echo ToMakeMovie !ToMakeMovie! in %%~y
 
 )
 if "%otheropca11%" == "" (
@@ -705,12 +707,23 @@ echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 ) else (
+if "%ToMakeMovie%" == "true" (
 ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
+) else (
+call :noext "!outfolder!\!mode01nam!"
+xcopy "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
+echo NUL > "!NoExtPath!\!FPS!fps.txt"
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
+echo 連番画像生成先フォルダ:!NoExtPath! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
+)
 )
 Del /Q !TMP_ANM! > NUL 2>&1
 Del /Q !wfd_folder! > NUL 2>&1
