@@ -152,6 +152,7 @@ set folderoutmode=2
 :       の上の階層につくられ、その中にまとめて画像が入ります。
 :       もとのファイル構造は維持されます。
 :  3 → 2 のフォルダを③で設定した形式に圧縮します。
+:  4 → ④で指定したフォルダに出力します。
 :************************************************************
 :【②】出力フォルダ名
 :Output folder name[This batch's own mode]
@@ -173,6 +174,15 @@ set compformat=7z
 :対応形式は"7-Zip"が対応している
 :  7z, XZ, BZIP2, GZIP, TAR, ZIP, WIM
 :です。
+:************************************************************
+:【④】フルパス指定
+:Full Path Order
+:
+
+set outfolderbyFullpath=
+
+:"～"で囲わずに、フルパスで指定してください。
+:
 :=============================================================
 :
 :処理終了時に音を鳴らす
@@ -232,6 +242,24 @@ set IccProf=
 :無効にする場合は空欄にします。
 :=============================================================
 :
+:作業フォルダの設定
+:Temporary Folder
+:
+:【モード設定】
+
+set TMPFolderMode=a
+
+: a →通常の%TMP%フォルダ
+: b →出力フォルダと同じ
+: c →↓で指定する
+
+set outfolderbyFullpath=
+
+:フルパスで"～"で囲わず指定してください。
+:特殊なフォルダだとうまくできません。
+:
+:=============================================================
+:
 :
 :その他オプション(上級者用設定)
 :
@@ -254,7 +282,7 @@ set otheropff01=
 :  となります。
 :
 :（例）
-:　　waifu2xco-noise_scale-photo-Lv1-4x_motogazounonamae.png
+:　　source_waifu2x-noise_scale-photo-Lv1-1280x1280.png
 :
 :
 :この下から処理用のプログラムが始まります。
@@ -338,7 +366,9 @@ type NUL > "%fname_txt%"
 set exte=.png
 set per=%%
 set hoge=*.%inexli01::= *.%
-
+if "%TMPFolderMode%" == "c" (
+set TMP=%TMPfoldernameset%
+)
 pushd "%~1" > NUL 2>&1
 set pushderrorlv=%ErrorLevel%
 if "%pushderrorlv%" GEQ "1" (
@@ -358,7 +388,11 @@ set outfolder=%~dp1\%outfoldernameset%
 set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
 set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1\%outfoldernameset%.%compformat%
+) else if "%folderoutmode%" == "4" (
+set outfoldercd=%outfolderbyFullpath%
+set outfolder=%outfolderbyFullpath%
 ) else (
+set outfoldercd=%~dp1\%outfoldernameset%
 set outfolder=%~dp1\%outfoldernameset%
 )
 
@@ -378,6 +412,8 @@ set outfolder=%~dp1%outfoldernameset%
 set outfoldercd=%TMP%\%batnm%\%outfoldernameset%
 set outfolder=%TMP%\%batnm%\%outfoldernameset%
 set lastzip=%~dp1%outfoldernameset%.%compformat%
+) else if "%folderoutmode%" == "4" (
+set outfolder=%outfolderbyFullpath%
 ) else (
 set outfolder=%~dp1%outfoldernameset%
 )
@@ -520,6 +556,8 @@ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 
 goto end
 
@@ -551,9 +589,9 @@ if "!jpegfile!" == "true" (
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
  exit /b
  )
@@ -564,9 +602,9 @@ if "!jpegfile!" == "true" (
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
  exit /b
 )
@@ -697,6 +735,8 @@ echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 if "%twittermode%" == "true" (
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
@@ -704,6 +744,9 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
+ 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 set allis=true
 if "%debugmode%" == "false" (
@@ -763,7 +806,9 @@ set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
 set outfolder=%~dp1\%outfoldernameset%
 )
-
+if "%TMPFolderMode%" == "b" (
+set TMP=!outfolder!
+)
 call :multiplier "%~1"
 set exte02=%exte%
 set exte=%~x1
@@ -833,6 +878,17 @@ set renban=!number!
 )
 
 set mode01nam=wfd_%~n1-!renban!.png
+if /I not "!anmMode!" == "GIF" (
+if /I not "%~x1" == ".avi" (
+if "%mode01%" == "scale" (
+set mode01var=-m scale --scale_ratio %scale_ratio01%
+) else if "%mode01%" == "noise" (
+set mode01var=-m noise --noise_level %noise_level01%
+) else (
+set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
+)
+)
+)
 if "!anmMode!" == "GIF" (
 call :alpha "!Serialed_Picture!-!renban!.png"
 goto anm_end_for
@@ -855,13 +911,15 @@ ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成動画名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 Del /Q !TMP_ANM! > NUL 2>&1
 Del /Q !wfd_folder! > NUL 2>&1
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
 set allis=true
 
@@ -922,7 +980,9 @@ set outfolder=%~dp1
 ) else if "%folderoutmode%" == "1" (
 set outfolder=%~dp1\%outfoldernameset%
 )
-
+if "%TMPFolderMode%" == "b" (
+set TMP=!outfolder!
+)
 mkdir "!outfolder!" > NUL 2>&1
 
 call :multiplier "%~1"
@@ -940,9 +1000,9 @@ if "!allis!" == "true" exit /b
 call :command_w2x "%~1"
 
  call wtb.bat STOP
- echo . >>"%logname%.log" 2>>&1
+ echo. >>"%logname%.log" 2>>&1
  call wtb.bat PRINT >>"%logname%.log" 2>>&1
- echo .
+ echo.
  call wtb.bat PRINT
 
 goto end
@@ -1011,6 +1071,9 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
+ 
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 goto end
 
@@ -1061,6 +1124,8 @@ if "%folderoutmode%" == "2" (
 call :outfilename_a "%~1"
 ) else if "%folderoutmode%" == "3" (
 call :outfilename_a "%~1"
+) else if "%folderoutmode%" == "4" (
+call :outfilename_a "%~1"
 )
 
 call :animation "!FilePath!"
@@ -1086,6 +1151,8 @@ goto shiwake
 
 pushd %1
 echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード]
+echo %DATE% %TIME% "%~1"の処理を開始します...[フォルダモード] >>"%logname%.log" 2>>&1
+
 set folderpath=%~1
 if "%subf01%" == "true" (
  rem サブフォルダ処理モード
@@ -1099,6 +1166,10 @@ if "%subf01%" == "true" (
   call :w2xf1 !filepath!
   )
  )
+echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード]
+echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード] >>"%logname%.log" 2>>&1
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
 shift
 if "%~1" == "" goto Finish_w2x
 goto shiwake
@@ -1121,6 +1192,12 @@ call :outfilename_b "%~1" "%~3"
 call :outfilename_a "%~1"
 )
 ) else if "%folderoutmode%" == "3" (
+if "%2" == "true" (
+call :outfilename_b "%~1" "%~3"
+) else (
+call :outfilename_a "%~1"
+)
+) else if "%folderoutmode%" == "4" (
 if "%2" == "true" (
 call :outfilename_b "%~1" "%~3"
 ) else (
@@ -1155,7 +1232,7 @@ call wta.bat PRINT
 if "%folderoutmode%" == "3" (
 echo !DATE! !TIME! 7-ZIPで圧縮を開始します。
 echo !DATE! !TIME! 7-ZIPで圧縮をしました。 >>"%logname%.log" 2>>&1
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1
@@ -1171,7 +1248,7 @@ echo !DATE! !TIME! 7-ZIPで圧縮が完了しました。
 echo "%lastzip%"
 rd /S /Q "%outfoldercd%" > NUL 2>&1
 ) else (
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
+echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 echo. >>"%logname%.log" 2>&1
 echo. >>"%logname%.log" 2>&1

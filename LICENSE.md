@@ -9,7 +9,8 @@
 - qiitaの利用規約( http://qiita.com/terms#9 )
 - MITライセンス Copyright (c) 2016 tamaina
 - pngquant( https://github.com/pornel/pngquant/blob/master/COPYRIGHT )
-の8つのライセンスに基づいて公開されています。
+- jquery( https://jquery.org/license/ ) - MITライセンス
+の9つのライセンスに基づいて公開されています。
 各ライセンスの内容はリンク先をご確認ください。
 また、どのファイルがどのライセンスに対応しているかは以下に記します。
 
@@ -19,6 +20,7 @@
 
 - batフォルダの中身(以下特記)
   - waifu2x.icoは、https://github.com/nagadomi/waifu2x/blob/master/images/miku_bg.png に縮小などの改変をしたものが含まれています。
+  - **js/jquery-1.12.2.min.jsは[jquery](https://jquery.org/license/)のライセンスです。**
   - 借用したコードはこの範囲に含みません。別途URLが直近に示されています。
 - readme.md
 - howtouse.md
