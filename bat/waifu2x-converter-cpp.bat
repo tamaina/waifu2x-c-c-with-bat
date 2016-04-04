@@ -36,7 +36,7 @@ set model01=anime_style_art_rgb
 :【①】自動倍率計算モードon/off
 :Auto Calculate Magnification
 
-set scaleauto=false
+set scaleauto=true
 
 :拡大率を自動で計算してすべての画像の幅または高さをそろえます。
 :true(有効)/false(無効)
@@ -258,13 +258,13 @@ set IccProf=
 :
 :【モード設定】
 
-set TMPFolderMode=a
+set TMPFolderMode=c
 
 : a →通常の%TMP%フォルダ
 : b →出力フォルダと同じ
 : c →↓で指定する
 
-set outfolderbyFullpath=
+set outfolderbyFullpath=G:\TEMP
 
 :フルパスで"～"で囲わず指定してください。
 :特殊なフォルダだとうまくできません。
@@ -851,6 +851,9 @@ type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
 
 if /I "%~x1" == ".gif" (
+for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
+set FPS=%%t
+)
 set identify_txt=%TMP%\w2xident.txt
 set transparent_txt=%TMP%\w2xtp.txt
 type NUL > "!identify_txt!"

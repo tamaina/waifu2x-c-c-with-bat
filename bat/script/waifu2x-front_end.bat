@@ -640,6 +640,9 @@ type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
 
 if /I "%~x1" == ".gif" (
+for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
+set FPS=%%t
+)
 set identify_txt=%TMP%\w2xident.txt
 set transparent_txt=%TMP%\w2xtp.txt
 type NUL > "!identify_txt!"
