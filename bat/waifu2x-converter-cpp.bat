@@ -595,7 +595,7 @@ if "!jpegfile!" == "true" (
  goto nam_b
  ) else (
  set nowaifu=true
- set mode01nam=%~n1_reduced!exte!
+ set "mode01nam=%~n1_reduced!exte!"
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -608,7 +608,7 @@ if "!jpegfile!" == "true" (
  )
 ) else (
  set nowaifu=true
- set mode01nam=%~n1_reduced!exte!
+ set "mode01nam=%~n1_reduced!exte!"
  echo !DATE! !TIME! 縮小だけ行います。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! 縮小だけ行います。
  call :success "%~1"
@@ -622,29 +622,29 @@ if "!jpegfile!" == "true" (
 :nam_a
 set scaling=true
 if "%scaleauto%" == "true" (
-set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+set "mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-%scaleauto_width01%x%scaleauto_height01%!exte!"
 ) else (
-set mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x!exte!
+set "mode01nam=%~n1_waifu2x-noise_scale-%model01%-Lv%noise_level01%-!scale_ratio02!x!exte!"
 )
-set mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%
+set "mode01var=-m noise_scale --noise_level %noise_level01% --scale_ratio %scale_ratio01%"
 goto EONam
 
 :nam_b
 
 set scaling=false
-set mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!
-set mode01var=-m noise --noise_level %noise_level01%
+set "mode01nam=%~n1_waifu2x-noise-%model01%-Lv%noise_level01%!exte!"
+set "mode01var=-m noise --noise_level %noise_level01%"
 goto EONam
 
 :nam_c
 
 set scaling=true
 if "%scaleauto%" == "true" (
-set mode01nam=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%!exte!
+set "mode01nam=%~n1_waifu2x-scale-%model01%-%scaleauto_width01%x%scaleauto_height01%!exte!"
 ) else (
-set mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x!exte!
+set "mode01nam=%~n1_waifu2x-scale-%model01%-!scale_ratio02!x!exte!"
 )
-set mode01var=-m scale --scale_ratio %scale_ratio01%
+set "mode01var=-m scale --scale_ratio %scale_ratio01%"
 goto EONam
 
 :EONam
@@ -780,15 +780,29 @@ goto end
 :===========================================================================================================================================
 
 :animation
-set number=0
 
-for /f "delims=" %%a in ( 'identify "%~1"' ) do (
+set TMP_ANM=%TMP%\%~n1-anm
+set wfd_folder=%TMP%\%~n1-anm-waifued
+set Serialed_Picture=!TMP_ANM!\%~n1
+set ffmpeg_txt=%TMP%\w2xffmpeg.txt
+mkdir "!TMP_ANM!" > NUL 2>&1
+
+if /I "%~x1" == ".gif" (
+convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
+) else (
+ffmpeg -i "%~1" -f image2 -vcodec png "!Serialed_Picture!-%%012d.png" > "!ffmpeg_txt!" 2>&1
+)
+set number=0
+for /F "delims=" %%a in ( 'dir /B "!TMP_ANM!\*.png"' ) do (
 set /A "number = number + 1"
 )
 if !number! GTR 1 (
 set animation=true
+mkdir "!wfd_folder!" > NUL 2>&1
 ) else (
 set animation=false
+Del /Q "!TMP_ANM!" > NUL 2>&1
+type NUL > "!ffmpeg_txt!" > NUL 2>&1
 exit /b
 )
 if /I "%~x1" == ".gif" (
@@ -821,46 +835,31 @@ set outfolder=%~dp1\%outfoldernameset%
 if "%TMPFolderMode%" == "b" (
 set TMP=!outfolder!
 )
-call :multiplier "%~1"
+call :multiplier "!Serialed_Picture!-000000000001.png"
 set exte02=%exte%
 set exte=%~x1
 call :namer "%~1"
 set exte=!exte02!
-set TMP_ANM=%TMP%\%~n1-anm
-set wfd_folder=%TMP%\%~n1-anm-waifued
-set Serialed_Picture=!TMP_ANM!\%~n1
-mkdir "!TMP_ANM!" > NUL 2>&1
-mkdir "!wfd_folder!" > NUL 2>&1
 
+
+set fps_txt=%TMP%\w2xfps.txt
+type NUL > "!ffmpeg_txt!"
+type NUL > "!fps_txt!"
+CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!" > NUL 2>&1
+set /P FPS= < "!fps_txt!"
+type NUL > "!ffmpeg_txt!"
+type NUL > "!fps_txt!"
 
 if /I "%~x1" == ".gif" (
-for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
-set FPS=%%t
-)
 set identify_txt=%TMP%\w2xident.txt
 set transparent_txt=%TMP%\w2xtp.txt
 type NUL > "!identify_txt!"
 type NUL > "!transparent_txt!"
 identify -verbose "%~1" > "!identify_txt!" 2>&1
-convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
 CScript "%batdp%\script\extract-transparent.js" "!identify_txt!" "!transparent_txt!" > NUL 2>&1
 set /P transparent= < "!transparent_txt!"
 type NUL > "!identify_txt!"
 type NUL > "!transparent_txt!"
-) else (
-set ffmpeg_txt=%TMP%\w2xffmpeg.txt
-set fps_txt=%TMP%\w2xfps.txt
-type NUL > "!ffmpeg_txt!"
-type NUL > "!fps_txt!"
-ffmpeg -i "%~1" -f image2 -vcodec png "!Serialed_Picture!-%%012d.png" > "!ffmpeg_txt!" 2>&1
-CScript "%batdp%\script\extract-fps.js" "!ffmpeg_txt!" "!fps_txt!" > NUL 2>&1
-set /P FPS= < "!fps_txt!"
-type NUL > "!ffmpeg_txt!"
-type NUL > "!fps_txt!"
-set number=0
-for /F "delims=" %%a in ( 'dir /B "!TMP_ANM!\*.png"' ) do (
-set /A "number = number + 1"
-)
 )
 
 setlocal
@@ -924,10 +923,21 @@ set allis=true
 endlocal
 
 if "!anmMode!" == "GIF" (
+if "%ToMakeMovie%" == "true" (
 convert -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+) else (
+call :noext "!outfolder!\!mode01nam!"
+xcopy "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
+echo NUL > "!NoExtPath!\!FPS!fps.txt"
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
+echo 連番画像生成先フォルダ:!NoExtPath! >>"%logname%.log" 2>>&1
+echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
+)
 ) else (
 if "%ToMakeMovie%" == "true" (
 ffmpeg -i "!wfd_folder!\wfd_%~n1-%%012d.png" -r !FPS! %otheropff01% "!outfolder!\!mode01nam!"
