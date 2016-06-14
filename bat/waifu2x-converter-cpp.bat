@@ -84,10 +84,9 @@ set scale_ratio01=2
 
 set noise_level01=2
 
-: 1,2,super どれかを選択
+: 1,2,3 どれかを選択
 : 1のほうが除去量が少なく現物に忠実です。
-: superは0.9のめちゃくちゃ強力なモデルです。
-: superはphoto版が用意されていません。
+: 3になるにつれて除去量が多くなっていきます。
 :=============================================================
 :
 :変換する拡張子[-l --input_extention_list]
@@ -439,19 +438,6 @@ echo ログ:"%logname%.log"
 :next1
 call wta.bat START
 
-:super処理
-if "%noise_level01%" == "super" (
- if "%model01%" == "photo" (
- echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。
- echo photoモデルではsuperが使えません。anime_style_art_rgbモデルで処理します。 >>"%logname%.log" 2>>&1
- set model01=super-anime_style_art_rgb
- set noise_level01=2
- ) else if not "%model01:anime_style_art=hoge%" == "%model01%" (
- set model01=super-%model01%
- set noise_level01=2
- )
-)
-
 :モード設定-自動倍数設定
 
 if "%scaleauto%" == "true" (
@@ -463,7 +449,7 @@ if "%scaleauto%" == "true" (
 )
 
 if "%scaleauto%" == "true" (
-identify -help > NUL 2>&1
+magick identify -help > NUL 2>&1
 if errorlevel 2 (
  echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。
  echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。 >>"%logname%.log" 2>>&1
@@ -545,9 +531,9 @@ goto end
 
 :noexpant
 if "!scale_ratio01!" == "0" (
-convert "%~1" -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick identify "%~1" -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-convert "%~1" -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick identify "%~1" -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
@@ -657,10 +643,10 @@ if "%scaleauto%" == "true" (
 echo !DATE! !TIME! 倍率を自動計算します。 >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! 倍率を自動計算します。
 )
-for /f %%x in ( 'identify -format "%%w\n" "%~1"' ) do (
+for /f %%x in ( 'magick identify -format "%%w\n" "%~1"' ) do (
 set imagewidth=%%x
 )
-for /f %%y in ( 'identify -format "%%h\n" "%~1"' ) do (
+for /f %%y in ( 'magick identify -format "%%h\n" "%~1"' ) do (
 set imageheight=%%y
 )
 CScript "%batdp%\script\multiplier.js" "%~1" %scaleauto_width01% %scaleauto_height01% "%multset_txt%" !imageheight! !imagewidth! %scaleauto% %scale_ratio02% > NUL 2>&1
@@ -701,11 +687,11 @@ set doingalpha=true
 
 set debugmode=false
 
-convert -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
-convert -size !imagewidth!x!imageheight! xc:black "!blackimage!"
+magick identify -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
+magick identify -size !imagewidth!x!imageheight! xc:black "!blackimage!"
 composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
 composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
-set CMD_IDENTIFY=identify -format "%%k" "!alphaimage!"
+set CMD_IDENTIFY=magick identify -format "%%k" "!alphaimage!"
 for /f "usebackq delims=" %%a in (`!CMD_IDENTIFY!`) do set image_mean=%%a
 
 if "!image_mean!" == "1" (
@@ -716,7 +702,7 @@ set alphais=false
 echo !DATE! !TIME! alpha情報が見つかりました。
 echo !DATE! !TIME! alpha情報が見つかりました。 >>"%logname%.log" 2>>&1
 set alphais=true
-convert "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
+magick identify "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
  echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
  echo alpha情報をwaifu2xで拡大します...
 setlocal
@@ -727,7 +713,7 @@ set twittermode=false
 call :command_w2x "!alphaimage!"
 endlocal
 if /I "!GifFlag!" == "true" (
-convert "!waifualpha!" -threshold 50%% "!waifualpha!"
+magick identify "!waifualpha!" -threshold 50%% "!waifualpha!"
 )
 
  echo !DATE! !TIME! 本体をwaifu2xで処理します... >>"%logname%.log" 2>>&1
@@ -788,7 +774,7 @@ set ffmpeg_txt=%TMP%\w2xffmpeg.txt
 mkdir "!TMP_ANM!" > NUL 2>&1
 
 if /I "%~x1" == ".gif" (
-convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
+magick identify +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
 ) else (
 ffmpeg -i "%~1" -f image2 -vcodec png "!Serialed_Picture!-%%012d.png" > "!ffmpeg_txt!" 2>&1
 )
@@ -851,14 +837,14 @@ type NUL > "!ffmpeg_txt!"
 type NUL > "!fps_txt!"
 
 if /I "%~x1" == ".gif" (
-for /F "delims=" %%t in ( 'identify -format "%%T\n" "%~1"' ) do (
+for /F "delims=" %%t in ( 'magick identify -format "%%T\n" "%~1"' ) do (
 set FPS=%%t
 )
 set identify_txt=%TMP%\w2xident.txt
 set transparent_txt=%TMP%\w2xtp.txt
 type NUL > "!identify_txt!"
 type NUL > "!transparent_txt!"
-identify -verbose "%~1" > "!identify_txt!" 2>&1
+magick identify -verbose "%~1" > "!identify_txt!" 2>&1
 CScript "%batdp%\script\extract-transparent.js" "!identify_txt!" "!transparent_txt!" > NUL 2>&1
 set /P transparent= < "!transparent_txt!"
 type NUL > "!identify_txt!"
@@ -927,7 +913,7 @@ endlocal
 
 if "!anmMode!" == "GIF" (
 if "%ToMakeMovie%" == "true" (
-convert -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
+magick identify -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
@@ -1094,19 +1080,19 @@ call :noext !outfolder!\!mode01nam!
 if not "%OutputExtension%" == "png" (
 
  if "%OutputExtension%" == "false" (
- convert "!outfolder!\!mode01nam!" "!NoExtPath!%~x1"
+ magick identify "!outfolder!\!mode01nam!" "!NoExtPath!%~x1"
  if /I not "%~x1" == ".png" del "!outfolder!\!mode01nam!" > NUL 2>&1
  ) else (
- convert "!outfolder!\!mode01nam!" "!NoExtPath!.%OutputExtension%"
+ magick identify "!outfolder!\!mode01nam!" "!NoExtPath!.%OutputExtension%"
  del "!outfolder!\!mode01nam!" > NUL 2>&1
  )
 if not "%IccProf%" == "" (
-convert "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!NoExtPath!.%OutputExtension%" >>"%logname%.log" 2>>&1
+magick identify "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!NoExtPath!.%OutputExtension%" >>"%logname%.log" 2>>&1
 )
 
 ) else (
 if not "%IccProf%" == "" (
-convert "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick identify "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 )
 
@@ -1128,7 +1114,7 @@ goto end
 :toPng
 if /I not "%~x1" == ".png" (
 set Pngtf=false
-convert "%~1" "%~dpn1.png"
+magick identify "%~1" "%~dpn1.png"
 if /I "%~x1" == ".jpg" (
  set jpegfile=true
  ) else if /I "%~x1" == ".jpeg" (

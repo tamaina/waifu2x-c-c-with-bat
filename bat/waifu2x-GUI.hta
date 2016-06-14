@@ -11,11 +11,11 @@ body         {
               font-family:"Meiryo","Gen Shin Gothic","GenEi Gothic","Source Han Sans",sans-serif;
               margin-left:7%;
               margin-right:7%;
+              margin-top:0;
               position:relative;
               scrollbar-base-color:#171b1f;
               scrollbar-track-color:#343638;
               scrollbar-arrow-color:#FFFFFF;
-              text-shadow: 1px 1px 2px #556;
              }
 input        {
               font-weight:bold,medium,normal;
@@ -51,7 +51,7 @@ legend       {
               margin-left:-17px;
               margin-bottom:0px;
               width:100px;
-              background-color:#171b1f;
+              background-color:#000000;
               border:solid 1px #484b4f;
               font-weight:bold;
               padding-left:30px;
@@ -68,16 +68,32 @@ td           {
 p            {
               margin:10px;
              }
+@media screen and (min-width: 650px) {
 .rightcontent{
               float:right;
               width:49%;
-              margin-left:1px;
+              margin:0;
              }
 .left_content{
               float:left;
               width:49%;
-              margin-right:1px;
+              margin:0;
              }
+}
+@media screen and (max-width: 650px) {
+.rightcontent{
+              float:right;
+              width:100%;
+              clear:left;
+              margin:0;
+             }
+.left_content{
+              float:left;
+              width:100%;
+              clear:right;
+              margin:0;
+             }
+}
 Button.normal       {
               border-radius:3px;
               font-weight:medium;
@@ -128,6 +144,35 @@ Button.sanshoin       {
               background-color:#00FF00;
               bottom:0px;
               }
+@media screen and (min-width: 560px) {
+Button.start       {
+              font-size: 16pt;
+              }
+Button.sanshoin       {
+              font-size: 16pt;
+              }
+}@media screen and (max-width: 560px) {
+Button.start       {
+              font-size: 13pt;
+              }
+Button.sanshoin       {
+              font-size: 13pt;
+              }
+}@media screen and (max-width: 480px) {
+Button.start       {
+              font-size: 10pt;
+              }
+Button.sanshoin       {
+              font-size: 10pt;
+              }
+}@media screen and (max-width: 410px) {
+Button.start       {
+              font-size: 8pt;
+              }
+Button.sanshoin       {
+              font-size: 8pt;
+              }
+}
 Button.filefolder       {
               border-radius:3px;
               font-weight:medium;
@@ -249,13 +294,9 @@ form.TMPFolderMode[2].checked                = true;
 }
 form.TMPfoldernameset.value                  = splited[23].substr( 1 , splited[23].length - 2 ).replace( /△/gi ," " );
 form.outfolderbyFullpath.value               = splited[24].substr( 1 , splited[24].length - 2 ).replace( /△/gi ," " );
-if ( splited[25] == "true" ) {
-form.ToMakeMovie.checked = true;
-} else {
-form.ToMakeMovie.checked = false;
-}
-window.resizeTo( splited[26],splited[27] );
-window.moveTo( splited[28],splited[29] );
+
+window.resizeTo( splited[25],splited[26] );
+window.moveTo( splited[27],splited[28] );
 }
 --></script>
 <title>waifu2x GUI</title>
@@ -265,7 +306,7 @@ window.moveTo( splited[28],splited[29] );
 
 <body>
 
-<div style="clear:both;display:block;position:fixed;background-color:rgba(238,238,234,0.75);margin-left:-7%;width:100%;box-shadow:0px 0px 6px 2px #EEEEEA;height:33px;">
+<div style="clear:both;display:block;position:fixed;background-color:rgba(238,238,234,0.75);margin-left:-7%;width:100%;box-shadow:0px 0px 6px 2px #EEEEEA;height:66px;">
 <h1 style="margin:0px;padding-left:7%;">waifu2x GUI</h1>
 </div>
 <div style="padding-top:57px;">
@@ -319,7 +360,7 @@ window.moveTo( splited[28],splited[29] );
 <fieldset name="F_scale_setting" id="F_scale_setting">
 <legend>拡大率</legend>
 <p>
-<label><input type="checkbox" name="scaleauto_check" value="checked" id="scaleauto_check" checked="checked" onclick="scaleautoChanging();">拡大率を自動計算</label>
+<label><input type="checkbox" name="scaleauto_check" id="scaleauto_check" checked="checked" onclick="scaleautoChanging();">拡大率を自動計算</label>
 </p><table>
 <tbody id="scaleAutoObj">
 <tr><th style="width:25%;">
@@ -389,11 +430,7 @@ window.moveTo( splited[28],splited[29] );
 </td></tr>
 <tr><td>
 <label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="wmv" id="wmv" checked="checked" onchange="funcinexli();">wmv</label></td><td>
-<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="mpg" id="mpg" checked="checked" onchange="funcinexli();">mpg</label>
-</td></tr>
-<tr><td>
-<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="mkv" id="mkv" checked="checked" onchange="funcinexli();">wkv</label></td><td>
-<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="m2ts" id="m2ts" checked="checked" onchange="funcinexli();">m2ts</label>
+<!--<label style="color:#FF2222;"><input type="checkbox" name="inexli01" value="avi" id="avi" checked="checked" onchange="funcinexli();">avi</label>-->
 </td></tr>
 </tbody></table>
 <p style="font-size:10pt">※動画の音声の合成は現バージョンでは対応していません。別途EcoDecoToolとAviutlで行ってください。</p>
@@ -434,14 +471,12 @@ window.moveTo( splited[28],splited[29] );
 
 <p><label><input type="checkbox" name="twittermode" id="twittermode">twitter投稿用に最適化する</label></p>
 <p><label><input type="checkbox" name="alphaswitch" id="alphaswitch" checked="checked">alpha情報をバッチファイルで処理する</label></p>
-<p><label><input type="checkbox" name="ToMakeMovie" id="ToMakeMovie" checked="checked">動画を変換した後動画に復元する</label></p>
-<p style="font-size:10pt">※上のチェックを外すと、連番pngとfpsが入ったフォルダが、出力フォルダに入ります。</p>
 
 </fieldset>
 </div>
 
 
-<div name="rightcontent" class="left_content">
+<div name="rightcontent" class="rightcontent">
 <fieldset>
 <legend>フォルダ出力設定</legend>
 <p>
@@ -534,25 +569,10 @@ var form = document.SettingForm;
 
 function windowresize(){
 var thewidth               = document.body.clientWidth;
-var leftcontent            = document.getElementsByName('left_content');
-var rightcontent           = document.getElementsByName('rightcontent');
 var fieldsets              = document.getElementsByTagName('fieldset');
 var legends                = document.getElementsByTagName('legend');
 
 if ( thewidth >= 651 ){
-document.body.style.margin = "0% 7%";
-for(i=0;i<rightcontent.length;i++){
-rightcontent[i].style.Float = "right";
-rightcontent[i].style.clear = "none";
-rightcontent[i].style.width = "49%";
-rightcontent[i].style.margin = "0px 0px 0px 0px";
-}
-for(i=0;i<leftcontent.length;i++){
-leftcontent[i].style.Float = "left";
-leftcontent[i].style.clear = "none";
-leftcontent[i].style.width = "49%";
-leftcontent[i].style.margin = "0px 0px 0px 0px";
-}
 for(i=0;i<legends.length;i++){
 var setwidth = fieldsets[i].clientWidth -60;
 try{
@@ -562,36 +582,10 @@ void 0;
 }
 }
 } else {
-document.body.style.margin = "0% 7%";
-for(i=0;i<rightcontent.length;i++){
-rightcontent[i].style.float = "none";
-rightcontent[i].style.clear = "left";
-rightcontent[i].style.width = "100%";
-rightcontent[i].style.margin = "0px";
-}
-for(i=0;i<leftcontent.length;i++){
-leftcontent[i].style.float = "none";
-leftcontent[i].style.clear = "right";
-leftcontent[i].style.width = "100%" ;
-leftcontent[i].style.margin = "0px";
-}
 for(i=0;i<legends.length;i++){
 var setwidth = fieldsets[i].clientWidth -60;
 legends[i].style.width = setwidth + "px" ;
 }
-}
-if ( thewidth > 560 ) {
-document.InputForm.input_file_Button.style.fontSize = "16pt";
-document.InputForm.StartButton.style.fontSize = "16pt";
-} else if ( thewidth > 480 ) {
-document.InputForm.input_file_Button.style.fontSize = "13pt";
-document.InputForm.StartButton.style.fontSize = "13pt";
-} else if ( thewidth > 410 ) {
-document.InputForm.input_file_Button.style.fontSize = "10pt";
-document.InputForm.StartButton.style.fontSize = "10pt";
-} else {
-document.InputForm.input_file_Button.style.fontSize = "8pt";
-document.InputForm.StartButton.style.fontSize = "8pt";
 }
 }
 
@@ -660,19 +654,8 @@ if ( folder  ==  null ) {
 sh = null;
 }
 
-function noiselevelhoge(){
-var noise_level1to3        = document.SettingForm.noise_level01.value;
-if ( noise_level1to3 == 1 ){
-return "1";
-} else if ( noise_level1to3 == 2 ){
-return "2";
-} else if ( noise_level1to3 == 3 ){
-return "super";
-}
-}
-
 function noiselevelrange(){
-var noise_level01 = noiselevelhoge();
+var noise_level01 = document.SettingForm.noise_level01.value;
 document.getElementById("noiselevelvalue").innerHTML = noise_level01;
 }
 
@@ -941,7 +924,6 @@ var otheropco01 = '\"' + form.otheropco01.value.replace( /\ /g , "△" ) + '\"';
 var otheropsz01 = '\"' + form.otheropsz01.value.replace( /\ /g , "△" ) + '\"';
 var otheropff01 = '\"' + form.otheropff01.value.replace( /\ /g , "△" ) + '\"';
 var outfolderbyFullpath = '\"' + form.outfolderbyFullpath.value.replace( /\ /g , "△" ) + '\"';
-var ToMakeMovie = form.ToMakeMovie.checked;
 if ( otheropca01 == "" ){
 var otheropca01 = '\"' + "none" + '\"';
 }
@@ -951,7 +933,7 @@ var otheropco01 = '\"' + "none" + '\"';
 if ( otheropsz01 == "" ){
 var otheropsz01 = '\"' + "none" + '\"';
 }
-var noise_level01 = noiselevelhoge();
+var noise_level01 = noiselevelrange();
 if ( form.alarm_switch.checked ){
 if ( form.alarmfile.value == "" ){
 var endwav = "none";
@@ -979,7 +961,7 @@ var OutputExtension = form.OutputExtension.value;
 } else {
 var OutputExtension = "false";
 }
-var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + TMPFolder + s + TMPfoldernameset + s + outfolderbyFullpath + s + ToMakeMovie + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
+var out = mode01 + s + model01 + s + scaleauto + s + scaleauto_width01 + s + scaleauto_height01 + s + scale_ratio01 + s + noise_level01 + s + inexli01 + s + subf01 + s + usewaifu + s + folderoutmode + s + outfoldernameset + s + compformat + s + endwav + s + twittermode + s + alphaswitch + s + OutputExtension + s + IccProf + s + otheropca01 + s + otheropco01 + s + otheropsz01 + s + otheropff01 + s + TMPFolder + s + TMPfoldernameset + s + outfolderbyFullpath + s + window.outerWidth + s + window.outerHeight + s + window.screenX + s + window.screenY + s;
 
 
 // 参考→ http://sei.qee.jp/docs/program/hta/location/href.html
@@ -1095,7 +1077,7 @@ var source = document.InputForm.input_file_fake_input_file.value;
 var fs = new ActiveXObject( "Scripting.FileSystemObject" );
 var FileShort = '"' + fs.GetFile( source ).ShortPath + '"';
 var TheFiles  = FileShort;
-alert( source );
+//alert( source );
 }
 alert( TheFiles );
 var myCD        = fs.GetFolder(".").ShortPath;
