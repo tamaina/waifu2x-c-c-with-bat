@@ -1,5 +1,6 @@
 @echo off
 set debug_hi=false
+set ToMakeMovie=false
 :===========================================================================================================================================
 :準備
 if "%1" == "" exit
@@ -162,6 +163,7 @@ if  "%debug_hi%" == "true" identify -format "%%w" %1
 if  "%debug_hi%" == "true" pause
 set scale_ratio02=%scale_ratio01%
 
+
 :start
 set exte=.png
 set per=%%
@@ -241,11 +243,11 @@ if "%scaleauto%" == "true" (
 if "%scaleauto%" == "true" (
 magick identify -help > NUL 2>&1
 if errorlevel 2 (
- echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。
- echo ImageMagickがインストールされていません。自動倍率計算とTwitterModeは無効です。 >>"%logname%.log" 2>>&1
- echo ImageMagickのインストール方法はググってください。
- set scaleauto=false
- set twittermode=false
+ echo ImageMagickがインストールされていないか、バージョンアップがされていません。インストールをお願いします。
+ echo ImageMagickがインストールされていません。バージョンアップがされていません。インストールしてください。 >>"%logname%.log" 2>>&1
+ echo なお、ImageMagickのインストール方法はググってください。
+ pause
+ exit
 )
 )
 :next2
@@ -293,8 +295,12 @@ if errorlevel 1 (
 )
 
 if "%folder%" == "true" (
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
  goto w2x_folder
  ) else if "%folder%" == "false" (
+echo -------------------------------------------
+echo ------------------------------------------- >>"%logname%.log" 2>>&1
  goto w2x_file
  ) else (
  echo Error！！！ >>"%logname%.log" 2>>&1
@@ -313,9 +319,9 @@ if "%scale_ratio01%" == "1" (
 )
 
 if %scaleauto_width01% LEQ %scaleauto_height01% (
-mogrify -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick mogrify -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if %scaleauto_width01% GTR %scaleauto_height01% (
-mogrify -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick mogrify -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 goto end
 
@@ -342,9 +348,6 @@ echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
-
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
 
 goto end
 
@@ -479,8 +482,8 @@ set debugmode=false
 
 magick identify -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
 magick identify -size !imagewidth!x!imageheight! xc:black "!blackimage!"
-composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
-composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
+magick composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
+magick composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
 set CMD_IDENTIFY=magick identify -format "%%k" "!alphaimage!"
 for /f "usebackq delims=" %%a in (`!CMD_IDENTIFY!`) do set image_mean=%%a
 
@@ -517,13 +520,11 @@ endlocal
 
  echo !DATE! !TIME! alpha情報と本体を合成します...
  echo !DATE! !TIME! alpha情報と本体を合成します...  >>"%logname%.log" 2>>&1
-composite "!waifualpha!" "!waifuednoalpha!" -alpha off -compose CopyOpacity png32:"!outfolder!\!mode01nam!"
+magick composite "!waifualpha!" "!waifuednoalpha!" -alpha off -compose CopyOpacity png32:"!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が正常に終了しました。
 echo 生成画像名:!mode01nam!
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
 if "%twittermode%" == "true" (
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! つづいて、twitter投稿用画像を作成します。
@@ -531,9 +532,6 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
- 
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 set allis=true
 if "%debugmode%" == "false" (
@@ -587,7 +585,9 @@ echo !TIME! 操作がなければ1分後に開始します...
 set anmMode=GIF
 set GifFlag=true
 ) else (
-echo 動画ファイルを入力しました。フレーム数が多いと処理に時間がかかりますが、よろしいですか？
+echo 動画ファイルを入力しました。フレーム数が多いとハードウェアに負担がかかりますが、よろしいですか？
+echo 処理速度は大丈夫ですか？グラボを積んでいないときついです。
+echo ハードディスク容量は大丈夫ですか？png出力とはいえ無尽蔵に容量を食っていきます。
 echo !TIME! 操作がなければ1分後に開始します...
 set anmMode=MOV
 set animation=true
@@ -709,7 +709,7 @@ echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
 ) else (
 call :noext "!outfolder!\!mode01nam!"
-xcopy "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
+move "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
 echo NUL > "!NoExtPath!\!FPS!fps.txt"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 連番画像生成先フォルダ:!NoExtPath! >>"%logname%.log" 2>>&1
@@ -727,7 +727,7 @@ echo -------------------------------------------
 echo ------------------------------------------- >>"%logname%.log" 2>>&1
 ) else (
 call :noext "!outfolder!\!mode01nam!"
-xcopy "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
+move "!wfd_folder!" "!NoExtPath!" /Y /I > NUL 2>&1
 echo NUL > "!NoExtPath!\!FPS!fps.txt"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 連番画像生成先フォルダ:!NoExtPath! >>"%logname%.log" 2>>&1
@@ -893,9 +893,6 @@ if "%twittermode%" == "true" (
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。 >>"%logname%.log" 2>>&1
  echo !DATE! !TIME! twitter投稿用画像の作成が完了しました。
  echo 生成画像名:forTwitter_!mode01nam!
- 
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
 )
 goto end
 
@@ -990,8 +987,6 @@ if "%subf01%" == "true" (
  )
 echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード]
 echo %DATE% %TIME% "%~1"の処理が終了しました。[フォルダモード] >>"%logname%.log" 2>>&1
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
 shift
 if "%~1" == "" goto Finish_w2x
 goto shiwake
@@ -1040,8 +1035,6 @@ goto end
 :===========================================================================================================================================
 
 :Finish_w2x
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
-echo -------------------------------------------
 echo Finish: %batnx% >>"%logname%.log" 2>>&1
 echo これで読み込まれた全ての画像の変換が完了しました。 >>"%logname%.log" 2>>&1
 echo これで読み込まれた全ての画像の変換が完了しました。
@@ -1054,12 +1047,10 @@ call wta.bat PRINT
 if "%folderoutmode%" == "3" (
 echo !DATE! !TIME! 7-ZIPで圧縮を開始します。
 echo !DATE! !TIME! 7-ZIPで圧縮をしました。 >>"%logname%.log" 2>>&1
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
 7za64 a "%lastzip%" "%outfoldercd%" %otherop7z01%
 ) else (
@@ -1070,12 +1061,10 @@ echo !DATE! !TIME! 7-ZIPで圧縮が完了しました。
 echo "%lastzip%"
 rd /S /Q "%outfoldercd%" > NUL 2>&1
 ) else (
-echo -------------------------------------------
-echo ------------------------------------------- >>"%logname%.log" 2>>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
-echo. >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
+echo . >>"%logname%.log" 2>&1
 )
 
 Del "%multset_txt%"
