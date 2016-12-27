@@ -28,7 +28,7 @@ echo êFêî:%colorqual%
 pngquant --ext .png --speed 1 --force %colorqual% "%twitter_png%"
 magick composite -compose dst_out "%dott_png%" "%twitter_png%" -matte "%twitter_png%"
 call :filesize "%twitter_png%"
-if !thesize! GTR 1000000 (
+if !thesize! GTR 3000000 (
 set /A colorqual=%colorqual% - 16
 goto return
 )

@@ -22,7 +22,7 @@ set mode01=auto_scale
 :モデル選択[--model_dir]
 :
 
-set model01=anime_style_art_rgb
+set model01=anime_style_art
 
 : anime_style_art (二次画像 輝度のみ)
 : anime_style_art_rgb (二次画像 RGBで)
@@ -82,7 +82,7 @@ set scale_ratio01=2
 :ノイズ除去レベル[--noise_level]
 :
 
-set noise_level01=2
+set noise_level01=0
 
 : 1,2,3 どれかを選択
 : 1のほうが除去量が少なく現物に忠実です。
@@ -132,7 +132,7 @@ set subf01=true
 :Which do you use cpp or caffe?[This batch's own mode]
 :
 
-set usewaifu=waifu2x-converter
+set usewaifu=waifu2x-converter_x64
 
 :使用するwaifu2xを選択します。
 :
@@ -151,7 +151,7 @@ set usewaifu=waifu2x-converter
 :【①】出力フォルダモード
 :Folder output mode setting
 
-set folderoutmode=2
+set folderoutmode=0
 
 :以下の数字で指定してください。
 :  0 →入力フォルダと同じフォルダに出力します。
@@ -199,7 +199,7 @@ set outfolderbyFullpath=
 :BEEP
 :
 
-set endwav=C:\Windows\Media\Ring03.wav
+set endwav=
 
 :終了時に音を鳴らします。要らない場合は空にしてください。
 :"～"で囲わずに、フルパスで指定してください。
@@ -263,7 +263,7 @@ set TMPFolderMode=c
 : b →出力フォルダと同じ
 : c →↓で指定する
 
-set outfolderbyFullpath=G:\TEMP
+set outfolderbyFullpath=C:\Users\Takumiya_Cho\Desktop\dat\waifued
 
 :フルパスで"～"で囲わず指定してください。
 :特殊なフォルダだとうまくできません。
@@ -535,9 +535,9 @@ goto end
 
 :noexpant
 if "!scale_ratio01!" == "0" (
-magick identify "%~1" -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick convert "%~1" -resize x%scaleauto_height01% "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 ) else if "!scale_ratio01!" == "1" (
-magick identify "%~1" -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick convert "%~1" -resize %scaleauto_width01%x "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 
 goto end
@@ -686,10 +686,10 @@ set waifuednoalpha_nam=waifuedsource-%~n1.png
 set waifuednoalpha=%TMP%\!waifuednoalpha_nam!
 set doingalpha=true
 
-set debugmode=false
+set debugmode=true
 
-magick identify -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
-magick identify -size !imagewidth!x!imageheight! xc:black "!blackimage!"
+magick convert -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
+magick convert -size !imagewidth!x!imageheight! xc:black "!blackimage!"
 magick composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
 magick composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
 set CMD_IDENTIFY=magick identify -format "%%k" "!alphaimage!"
@@ -703,7 +703,7 @@ set alphais=false
 echo !DATE! !TIME! alpha情報が見つかりました。
 echo !DATE! !TIME! alpha情報が見つかりました。 >>"%logname%.log" 2>>&1
 set alphais=true
-magick identify "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
+magick convert "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
  echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
  echo alpha情報をwaifu2xで拡大します...
 setlocal
@@ -742,16 +742,15 @@ if "%twittermode%" == "true" (
  echo 生成画像名:forTwitter_!mode01nam!
 )
 set allis=true
-if "%debugmode%" == "false" (
+if "!debugmode!" == "false" (
 Del "!waifualpha!"
 Del "!waifuednoalpha!"
 Del "!sourcenoalpha!"
-)
-)
-if "%debugmode%" == "false" (
+
 Del "!whiteimage!"
 Del "!blackimage!"
 Del "!alphaimage!"
+)
 )
 set doingalpha=false
 goto end
@@ -770,7 +769,7 @@ set ffmpeg_txt=%TMP%\w2xffmpeg.txt
 mkdir "!TMP_ANM!" > NUL 2>&1
 
 if /I "%~x1" == ".gif" (
-magick identify +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
+magick convert +adjoin -background none "%~1" "!Serialed_Picture!-%%012d.png"
 ) else (
 ffmpeg -i "%~1" -f image2 -vcodec png "!Serialed_Picture!-%%012d.png" > "!ffmpeg_txt!" 2>&1
 )
@@ -911,7 +910,7 @@ endlocal
 
 if "!anmMode!" == "GIF" (
 if "%ToMakeMovie%" == "true" (
-magick identify -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
+magick convert -dispose previous -delay !FPS! -loop 0 "!wfd_folder!\wfd_%~n1-*.png" "!outfolder!\!mode01nam!"
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。 >>"%logname%.log" 2>>&1
 echo 生成画像名:!mode01nam! >>"%logname%.log" 2>>&1
 echo !DATE! !TIME! "%~nx1"の変換作業が終了しました。
@@ -1020,9 +1019,7 @@ call :namer "%~1"
 if "!nowaifu!" == "true" exit /b
 if "%alphaswitch%" == "true" (
 if "%scaling%" == "true" (
-if "!jpegfile!" == "false" (
 call :alpha "%~1"
-)
 )
 )
 if "!allis!" == "true" exit /b
@@ -1078,19 +1075,19 @@ call :noext !outfolder!\!mode01nam!
 if not "%OutputExtension%" == "png" (
 
  if "%OutputExtension%" == "false" (
- magick identify "!outfolder!\!mode01nam!" "!NoExtPath!%~x1"
+ magick convert "!outfolder!\!mode01nam!" "!NoExtPath!%~x1"
  if /I not "%~x1" == ".png" del "!outfolder!\!mode01nam!" > NUL 2>&1
  ) else (
- magick identify "!outfolder!\!mode01nam!" "!NoExtPath!.%OutputExtension%"
+ magick convert "!outfolder!\!mode01nam!" "!NoExtPath!.%OutputExtension%"
  del "!outfolder!\!mode01nam!" > NUL 2>&1
  )
 if not "%IccProf%" == "" (
-magick identify "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!NoExtPath!.%OutputExtension%" >>"%logname%.log" 2>>&1
+magick convert "!outfolder!\!mode01namwoex!.%OutputExtension%" -profile "%IccProf%" "!NoExtPath!.%OutputExtension%" >>"%logname%.log" 2>>&1
 )
 
 ) else (
 if not "%IccProf%" == "" (
-magick identify "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
+magick convert "!outfolder!\!mode01nam!" -profile "%IccProf%" "!outfolder!\!mode01nam!" >>"%logname%.log" 2>>&1
 )
 )
 
@@ -1109,7 +1106,7 @@ goto end
 :toPng
 if /I not "%~x1" == ".png" (
 set Pngtf=false
-magick identify "%~1" "%~dpn1.png"
+magick convert "%~1" "%~dpn1.png"
 if /I "%~x1" == ".jpg" (
  set jpegfile=true
  ) else if /I "%~x1" == ".jpeg" (
