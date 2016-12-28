@@ -698,7 +698,7 @@ set waifuednoalpha_nam=waifuedsource-%~n1.png
 set waifuednoalpha=%TMP%\!waifuednoalpha_nam!
 set doingalpha=true
 
-set debugmode=true
+set debugmode=false
 
 magick convert -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
 magick convert -size !imagewidth!x!imageheight! xc:black "!blackimage!"
