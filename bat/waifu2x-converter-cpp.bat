@@ -151,7 +151,7 @@ set usewaifu=waifu2x-converter_x64
 :【①】出力フォルダモード
 :Folder output mode setting
 
-set folderoutmode=0
+set folderoutmode=1
 
 :以下の数字で指定してください。
 :  0 →入力フォルダと同じフォルダに出力します。
@@ -236,6 +236,15 @@ set alphaswitch=true
 :
 :きれいになる画像もあれば、汚くなる画像もあるため、画像との相性に
 :注意して使い分けてください。
+
+set AlphaBG=#000000
+
+:上の設定では、透過部分の代わりに使用する色を指定します。
+:☆指定方法
+:  ・Webカラー 書式:#ffffff
+:  ・RGB       書式:"rgb(255,255,255)"
+:  ・色名      書式:white
+:  ◎ImageMagickの色の指定です。
 :=============================================================
 :
 :iccプロファイルを付与
@@ -257,7 +266,7 @@ set IccProf=
 :
 :【モード設定】
 
-set TMPFolderMode=c
+set TMPFolderMode=b
 
 : a →通常の%TMP%フォルダ
 : b →出力フォルダと同じ
@@ -677,9 +686,12 @@ echo !DATE! !TIME! alpha情報の解析を行います... >>"%logname%.log" 2>>&1
 
 set whiteimage=%TMP%\white-%~n1.png
 set blackimage=%TMP%\black-%~n1.png
+set colorbase=%TMP%\base-%~n1.png
 set alphaimage=%TMP%\alpha-%~n1.png
 set waifualpha_nam=waifualpha-%~n1.png
 set waifualpha=%TMP%\!waifualpha_nam!
+set sourcewoalpha_nam=woalphasource-%~n1.png
+set sourcewoalpha=%TMP%\!sourcewoalpha_nam!
 set sourcenoalpha_nam=noalphasource-%~n1.png
 set sourcenoalpha=%TMP%\!sourcenoalpha_nam!
 set waifuednoalpha_nam=waifuedsource-%~n1.png
@@ -690,6 +702,7 @@ set debugmode=true
 
 magick convert -size !imagewidth!x!imageheight! xc:white "!whiteimage!"
 magick convert -size !imagewidth!x!imageheight! xc:black "!blackimage!"
+magick convert -size !imagewidth!x!imageheight! xc:%AlphaBG% "!colorbase!"
 magick composite -compose dst_out "%~1" "!blackimage!" -matte "!alphaimage!"
 magick composite -compose over "!alphaimage!" "!whiteimage!" "!alphaimage!"
 set CMD_IDENTIFY=magick identify -format "%%k" "!alphaimage!"
@@ -703,7 +716,7 @@ set alphais=false
 echo !DATE! !TIME! alpha情報が見つかりました。
 echo !DATE! !TIME! alpha情報が見つかりました。 >>"%logname%.log" 2>>&1
 set alphais=true
-magick convert "%~1" -background white -alpha deactivate -flatten "!sourcenoalpha!"
+magick convert "%~1" -background %AlphaBG% -alpha off "!sourcenoalpha!"
  echo alpha情報をwaifu2xで拡大します... >>"%logname%.log" 2>>&1
  echo alpha情報をwaifu2xで拡大します...
 setlocal
